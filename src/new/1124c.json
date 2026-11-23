@@ -1,0 +1,2164 @@
+[
+ {
+  "id": "g1|6t1",
+  "from": "g1|6",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "수나사의 산봉우리에 접하거나 또는 암나사의 홈 밑에 접하는 가상의 원통 지름은 바깥지름이다.",
+  "tag": {
+   "box": "나사의 세 지름",
+   "item": "바깥지름"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "- **바깥지름(호칭 지름)**: 수나사 산봉우리 / 암나사 골 밑에 닿는 지름 — 가장 크다."
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g1|7t1",
+  "from": "g1|7",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "측정하려는 양의 크기에 의해 측정기의 지침에 편위를 일으켜 편위 눈금과 비교하는 방법의 측정법은 영위법이다.",
+  "tag": {
+   "box": "측정 방식 네 가지",
+   "item": "편위법"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| 편위법 | 바늘이 움직인 양을 읽음 | 다이얼게이지, 스프링 저울 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g1|8t1",
+  "from": "g1|8",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "측정기의 구조상 발생하는 오차로 측정기 부품의 마모, 눈금의 부정확성, 지시 변화에 의한 오차 등으로 발생하는 오차는 기기오차이다.",
+  "tag": {
+   "box": "측정 오차의 종류",
+   "item": "기기오차"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g1|10t1",
+  "from": "g1|10",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "NC장치의 제어부에서 정확한 위치로 공구를 이동하게 하는 것은 라인필터이다.",
+  "tag": {
+   "box": "NC 공작기계의 구성",
+   "item": "서보기구"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "- 정보 처리 회로(NC 장치) → 서보기구(서보모터·드라이브) → 볼스크루 → 테이블(공구)"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g1|11t1",
+  "from": "g1|11",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "좌표계 중 임의의 위치를 0으로 설정하여 활용 할 수 있는 좌표계는 상대좌표이다.",
+  "tag": {
+   "box": "CNC 화면의 좌표 네 가지",
+   "item": "상대좌표"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| 상대좌표 | 임의의 점 | 원하는 곳에서 0으로 지울 수 있음 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g1|13t1",
+  "from": "g1|13",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "머시닝센터에서 공구교환을 지령하는 보조기능은 M02이다.",
+  "tag": {
+   "box": "자주 나오는 M코드",
+   "item": "M06"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| M05 | 주축 정지 | M06 | 공구 교환 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g1|17t1",
+  "from": "g1|17",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "프로그램에서 입력한 이송속도를 무시하고 조작반의 이송속도로 이송하게 하는 기능은 드라이런이다.",
+  "tag": {
+   "box": "자동 운전 보조 기능",
+   "item": "드라이런"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| 드라이 런 | 프로그램 F 무시, 조작판 이송속도로 이동 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g1|19t1",
+  "from": "g1|19",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "측정 오차를 최소로 하기 위한 지지점은 기준점이다.",
+  "tag": {
+   "box": "베셀점과 에어리점",
+   "item": "베셀점"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "- **베셀점**: 양 끝에서 약 0.2203L — 전체 **길이** 오차 최소(긴 자·봉)"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g1|20t1",
+  "from": "g1|20",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "머시닝센터에서 주축을 역회전 시키기위한 보조기능은 M04이다.",
+  "tag": {
+   "box": "자주 나오는 M코드",
+   "item": "M04"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| M03 | 주축 정회전 | M04 | 주축 역회전 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g1|21t1",
+  "from": "g1|21",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반에서 자동 나사가공 사이클은 G72이다.",
+  "tag": {
+   "box": "CNC 선반 복합 반복 사이클 G70~G76",
+   "item": "G76"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| G76 | 나사 절삭 사이클 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g1|22t1",
+  "from": "g1|22",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반 주축의 회전수를 검출하는 장치는 포지션코더이다.",
+  "tag": {
+   "box": "NC 공작기계의 구성",
+   "item": "포지션코더"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g1|23t1",
+  "from": "g1|23",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "2초 동안 일시정지를 하는 프로그램 지령은 G04 U20이다.",
+  "tag": {
+   "box": "휴지(드웰) G04",
+   "item": "G04 X2."
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "- 2초 = G04 X2. = G04 U2. = G04 P2000"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g1|25t1",
+  "from": "g1|25",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반에서 프로그램을 수정할수 있는 모드는 EDIT이다.",
+  "tag": {
+   "box": "CNC 조작판의 모드",
+   "item": "EDIT"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| EDIT | 프로그램 작성·수정 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g1|27t1",
+  "from": "g1|27",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CAM프로그램에서 불필요한 선을 지울 때 사용하는 기능은 필렛이다.",
+  "tag": {
+   "box": "2D 편집 명령",
+   "item": "트림"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| 트림 | 경계선 밖의 필요 없는 부분 잘라 내기 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g1|28t1",
+  "from": "g1|28",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC공작기계에서 서보모터의 회전운동을 테이블의 직선운동으로 바꾸는 기구는 볼스크류이다.",
+  "tag": {
+   "box": "볼스크루의 특징",
+   "item": "볼스크류"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g1|29t1",
+  "from": "g1|29",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "머시닝센터에서 공구 지름 좌측 보정 기능은 G42이다.",
+  "tag": {
+   "box": "공구 지름(인선 반지름) 보정",
+   "item": "G41"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| G41 | 좌측 보정(진행 방향 왼쪽) |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g2|6t1",
+  "from": "g2|6",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "45° 모따기를 나타내는 기호는 C이다.",
+  "tag": {
+   "box": "치수 보조 기호",
+   "item": "C"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| C | 45° 모따기 | C1 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g2|7t1",
+  "from": "g2|7",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "고객이 제품에 대한 사양이나 설명을 기록한 주문 개요를 첨부하여 제품의 기능, 치수, 형상 등 제품의 요구 조건을 제시한 도면은 제작도이다.",
+  "tag": {
+   "box": "용도에 따른 도면",
+   "item": "주문도"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| 주문도 | 고객이 요구 조건을 붙여 주문 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g2|16t1",
+  "from": "g2|16",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "가공한 공작물의 치수의 한계 범위를 표시하는 것으로, 최대허용치수와 최소허용치수의 범위는 공차이다.",
+  "tag": {
+   "box": "치수 공차 용어",
+   "item": "공차"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "- **기준치수**: 공차의 기준(예: Ø20)",
+   "- **치수 공차** = 최대허용치수 − 최소허용치수(0.2)"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g2|20t1",
+  "from": "g2|20",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "명령된 블록에서만 유효한 준비기능은 G04이다.",
+  "tag": {
+   "box": "모달 G코드와 원샷 G코드",
+   "item": "G04"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "- **원샷(00그룹)**: 지령한 블록에서만 유효 — G04(휴지), G10(데이터 설정), G27·G28(원점 복귀 확인·복귀), G50(선반 좌표계·최고 회전수), G92(머시닝센터 좌표계 설정)"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g2|21t1",
+  "from": "g2|21",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반에서 주축최고회전수를 설정하는 준비기능은 G40이다.",
+  "tag": {
+   "box": "주축 속도 지령 G96·G97·G50",
+   "item": "G50"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| G50 | 주축 최고 회전수 제한(선반) | G50 S2500 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g2|22t1",
+  "from": "g2|22",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "주축기능과 관계가 있는 어드레스는 S이다.",
+  "tag": {
+   "box": "CNC 프로그램 주소(어드레스)",
+   "item": "S"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| S | 주축 기능 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g2|23t1",
+  "from": "g2|23",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "선택적 프로그램을 정지시키기 위해 사용하는 보조기능은 M00이다.",
+  "tag": {
+   "box": "자주 나오는 M코드",
+   "item": "M01"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| M00 | 프로그램 정지 | M01 | 선택 정지 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g2|24t1",
+  "from": "g2|24",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "상대지령으로 작성된 프로그램은 G01 U20. W-20.이다.",
+  "tag": {
+   "box": "절대·상대·혼합 지령(CNC 선반)",
+   "item": "G01 U20. W-20."
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g2|25t1",
+  "from": "g2|25",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반에서 단면 거친 절삭 사이클은 G71이다.",
+  "tag": {
+   "box": "CNC 선반 복합 반복 사이클 G70~G76",
+   "item": "G72"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| G72 | 단면 거친 절삭 사이클 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g2|27t1",
+  "from": "g2|27",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "머시닝센터에서 공구길이 보정을 할 때 길이 보정번호 기호로 사용하는 알파벳은 H이다.",
+  "tag": {
+   "box": "머시닝센터 공구 보정",
+   "item": "H"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| 공구 길이 보정 + / − / 취소 | G43 / G44 / G49 | H |",
+   "- 예: G43 Z50. H02; G41 X0. Y0. D12;"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g2|28t1",
+  "from": "g2|28",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "통과측과 정지측으로 구성된 게이지로 제품의 합불 판단을 신속하게 하기 위해 사용하는 측정기는 인디게이터이다.",
+  "tag": {
+   "box": "한계게이지",
+   "item": "한계게이지"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g2|29t1",
+  "from": "g2|29",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "머시닝센터는 CNC밀링머신에 (   )을/를 부착한 기계를 말한다. 괄호에 들어갈 용어는 ATC이다.",
+  "tag": {
+   "box": "머시닝센터의 구성",
+   "item": "ATC"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "- 머시닝센터 = CNC 밀링 + **ATC(자동 공구 교환 장치)**",
+   "- ATC: 공구 매거진(공구 저장) + 체인지 암(교환 팔)"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g3|9t1",
+  "from": "g3|9",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "축의 최소치수가 구멍의 최대치수보다 크며 가열 또는 냉각시킨 후에 부품을 삽입 후, 상온으로 복귀시켜 사용하는 방법으로 다른 부품과 조립을 하는 경우로 분해가 영구적으로 불가능한 것을 뜻하는 용어는 중간끼워맞춤이다.",
+  "tag": {
+   "box": "끼워맞춤과 틈새·죔새",
+   "item": "억지끼워맞춤"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| 억지 끼워맞춤 | 축 최소 ≥ 구멍 최대 | 항상 죔새 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g3|13t1",
+  "from": "g3|13",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "기하공차에서 모양 공차인 것은 평행도공차이다.",
+  "tag": {
+   "box": "기하공차의 종류",
+   "item": "진원도공차"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g3|15t1",
+  "from": "g3|15",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "KS D에 따른 재료기호 표시에서 회주철 GC 200에서 숫자 \"200\"이 의미하는 것은 최저인장강도이다.",
+  "tag": {
+   "box": "KS D 재료 기호 읽기",
+   "item": "최저인장강도"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| GC200 | 회주철품 | 최저 인장강도 200 N/mm² |",
+   "| SC450 | 탄소강 주강품 | 최저 인장강도 450 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g3|17t1",
+  "from": "g3|17",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "선반에서 나사를 절삭할 때 주축과 ( ㄱ )를/을 변환기어에 연결하여 주축과 ( ㄱ )의 회전비를 맞추면 필요한 나사의 피치로 가공할 수 있다. 괄호 ㄱ 에 들어갈 단어는 심압대이다.",
+  "tag": {
+   "box": "범용 선반 나사 절삭 장치",
+   "item": "리드스크루"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "- 주축 → 변환기어 → **리드스크루** → 하프너트 → 왕복대(바이트) 이동",
+   "- 이송봉(피드 로드): 일반 이송용 / 리드스크루: 나사 절삭 전용"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g3|18t1",
+  "from": "g3|18",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "안전사고에서 물적 피해 사고를 뜻하는 단어는 손재 사고이다.",
+  "tag": {
+   "box": "개념 상자 없음: 손재 사고",
+   "item": "손재 사고"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g3|20t1",
+  "from": "g3|20",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반에서 인치데이터를 입력하기 위한 준비기능은 G10이다.",
+  "tag": {
+   "box": "자주 나오는 준비기능(G코드)",
+   "item": "G20"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| G00 | 급속 위치 결정 | G20 / G21 | 인치 / mm 입력 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g3|22t1",
+  "from": "g3|22",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "절삭유를 사용하기 위한 보조기능은 M05이다.",
+  "tag": {
+   "box": "자주 나오는 보조기능(M코드)",
+   "item": "M08"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| M01 | 선택적 정지 | M08 / M09 | 절삭유 ON / OFF |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g3|24t1",
+  "from": "g3|24",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "공구인선 우측보정을 뜻하는 준비기능은 G42이다.",
+  "tag": {
+   "box": "공구 인선(지름) 보정",
+   "item": "G42"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| G42 | 우측 보정 |",
+   "- CNC 선반 외경을 척 쪽으로 깎을 때는 보통 G42를 쓴다."
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g3|27t1",
+  "from": "g3|27",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "공정계획에서 작업에 필요한 소요 인원수, 작업량, 기계 대수 등의 보유 능력을 계획하는 단계는 재료 계획이다.",
+  "tag": {
+   "box": "공정 계획의 단계",
+   "item": "공수 계획"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| 공수 계획 | 작업량과 인원·기계 능력의 균형 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g3|28t1",
+  "from": "g3|28",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "접시머리 나사의 들어갈 부분을 원추형으로 가공하는 공구는 카운터싱크이다.",
+  "tag": {
+   "box": "구멍 가공 공구 정리",
+   "item": "카운터싱크"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| 카운터싱크 | 접시머리 나사 자리 | 원뿔 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g4|6t1",
+  "from": "g4|6",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "프로그램을 저장하지 않고 상황에 따라 원하는 동작을 자동운전하는 모드는 편집이다.",
+  "tag": {
+   "box": "CNC 조작판의 모드",
+   "item": "반자동"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| MDI(반자동) | 한두 블록을 직접 입력해 바로 실행(저장 안 함) |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g4|7t1",
+  "from": "g4|7",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반에서 생산성을 극대화 하기 위해 사용하는 척은 유압척이다.",
+  "tag": {
+   "box": "선반 척의 종류",
+   "item": "유압척"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| 유압척 | 유압으로 자동 체결, CNC 대량 생산 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g4|10t1",
+  "from": "g4|10",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "형상공차인 것은 직각도이다.",
+  "tag": {
+   "box": "기하공차의 종류",
+   "item": "진원도"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| 모양(형상) | 진직도, 평면도, 진원도, 원통도, 선의 윤곽도, 면의 윤곽도 | 필요 없음 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g4|13t1",
+  "from": "g4|13",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "새로운 절삭 공구로 가공물을 일정한 절삭 조건으로 절삭을 시작하여 공구의 교환 또는 재연삭을 할 때까지의 실질적인 절삭 시간의 합을 의미하는 용어는 피로시간이다.",
+  "tag": {
+   "box": "공구 수명",
+   "item": "공구수명시간"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g4|16t1",
+  "from": "g4|16",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "기계 원점을 기준으로 정한 좌표계는 기계 좌표계이다.",
+  "tag": {
+   "box": "CNC 화면의 좌표",
+   "item": "기계 좌표계"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g4|17t1",
+  "from": "g4|17",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "유연성 있는 생산 시스템으로 무인화 공정을 가능하게 하는 것은 CNC이다.",
+  "tag": {
+   "box": "자동화 생산 시스템 크기 순서",
+   "item": "FMS"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "- **FMS**: 여러 FMC·CNC + 자동 반송 + 자동 창고 → 무인화 유연 생산"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g4|22t1",
+  "from": "g4|22",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "홈, 윤곽 등 다양한 가공에 사용되는 원주면과 단면에 날이 있는 절삭공구는 엔드밀이다.",
+  "tag": {
+   "box": "밀링·드릴 공구 모양 구별",
+   "item": "엔드밀"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| 엔드밀 | 원통 둘레와 끝면에 날 | 홈·윤곽·포켓 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g4|23t1",
+  "from": "g4|23",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CAM프로그램을 이용하여 가공 경로 프로그램을 작성한 후, 머시닝센터로 프로그램을 입력하기 위한 모드는 급송이다.",
+  "tag": {
+   "box": "CNC 조작판의 모드",
+   "item": "편집"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| EDIT(편집) | 프로그램 작성·수정·입력 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g4|25t1",
+  "from": "g4|25",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "자동개시의 자동 프로그램이 연속적으로 실행되지 않도록 한 블록씩 실행시키는 기능은 싱글블록이다.",
+  "tag": {
+   "box": "자동 운전 보조 기능",
+   "item": "싱글블록"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| 싱글 블록 | 한 블록씩 실행 후 정지 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g4|26t1",
+  "from": "g4|26",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "공구마모에서 공구경사면이 오목하게 파여지는 현상은 치핑이다.",
+  "tag": {
+   "box": "공구 손상의 종류",
+   "item": "크레이터마모"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| 크레이터 마모 | 경사면이 분화구처럼 파임 | 칩 마찰열·확산(고속 절삭) |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g4|29t1",
+  "from": "g4|29",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "공구의 절손 원인으로 보기 어려운 것은 돌출량이 적다.이다.",
+  "tag": {
+   "box": "개념 상자 없음: 돌출량이 적다.",
+   "item": "돌출량이 적다."
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g5|6t1",
+  "from": "g5|6",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "뚫어져 있는 구멍을 정밀도가 높고, 가공 표면의 표면 거칠기를 좋게 하기 위해 사용하는 공구는 줄이다.",
+  "tag": {
+   "box": "구멍 가공 공구 정리",
+   "item": "리머"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| 리머 | 구멍 정밀 다듬질 | - |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g5|8t1",
+  "from": "g5|8",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반에서 주축을 1000[rpm]으로 역회전 시키기 위한 지령은 G97 M04 S1000이다.",
+  "tag": {
+   "box": "주축 속도 지령 G96·G97·G50",
+   "item": "G97 M04 S1000"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g5|11t1",
+  "from": "g5|11",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "길이의 기준으로 사용되는 평행 단도기는 사인바이다.",
+  "tag": {
+   "box": "게이지블록",
+   "item": "게이지블록"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g5|12t1",
+  "from": "g5|12",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반에서 증분값 명령 방식으로 이루어진 것은 G01 U10. W10.이다.",
+  "tag": {
+   "box": "CNC 선반의 절대·증분 지령",
+   "item": "G01 U10. W10."
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g5|14t1",
+  "from": "g5|14",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "휴지기능의 시간설정 어드레스로만 구성된 것은 A, Q, K이다.",
+  "tag": {
+   "box": "휴지(드웰) G04",
+   "item": "P, U, X"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g5|16t1",
+  "from": "g5|16",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "공구의 측면 날로 가공하는 경우 발생하는 편차를 보정하는 것은 공구 지름 보정이다.",
+  "tag": {
+   "box": "공구 지름 보정",
+   "item": "공구 지름 보정"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g5|18t1",
+  "from": "g5|18",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "프로그램의 끝을 나타내는 코드는 M00이다.",
+  "tag": {
+   "box": "자주 나오는 M코드",
+   "item": "M02"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| M02 | 프로그램 끝 | M30 | 프로그램 끝 + 되감기 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g5|20t1",
+  "from": "g5|20",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC밀링에서 3차원 자유 곡면을 가공하기에 가장 적합한 공구는 볼엔드밀이다.",
+  "tag": {
+   "box": "엔드밀의 종류",
+   "item": "볼엔드밀"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| 볼 엔드밀 | 반구 | 3차원 곡면 다듬질 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g5|23t1",
+  "from": "g5|23",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "머시닝센터를 이용한 구멍 가공 시 칩 배출을 위해 1회 절입량을 지정하는 사이클은 탭이다.",
+  "tag": {
+   "box": "머시닝센터 고정 사이클",
+   "item": "팩드릴"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g5|24t1",
+  "from": "g5|24",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "마이크로미터의 측정원리에 해당하는 기계요소는 나사이다.",
+  "tag": {
+   "box": "외측 마이크로미터 구조와 원리",
+   "item": "나사"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "- 원리: 나사 한 바퀴 = 피치만큼 이동"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "g5|28t1",
+  "from": "g5|28",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CAM 프로그램에서 생성된 가공경로를 NC데이터로 변환해주는 작업은 DNC이다.",
+  "tag": {
+   "box": "CAM 작업 순서",
+   "item": "포스트프로세싱"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "- 5단계: 포스트프로세싱 → NC 데이터(G코드)"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "m1|14t1",
+  "from": "m1|14",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "0.5초 동안 일시정지를 하는 프로그램 지령은 G04 X0.5이다.",
+  "tag": {
+   "box": "일시정지 G04",
+   "item": "G04 X0.5"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "m2|4t1",
+  "from": "m2|4",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반에서 절대값 명령 방식으로 이루어진 것은 G01 U10. W10.이다.",
+  "tag": {
+   "box": "CNC 선반의 절대·증분 지령",
+   "item": "G01 X10. Z10."
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "m2|11t1",
+  "from": "m2|11",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반에서 절삭속도를 160m/min으로 정회전 시키기 위한 명령은 G96 S160 M03이다.",
+  "tag": {
+   "box": "주축 속도 지령 G96·G97·G50",
+   "item": "G96 S160 M03"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "m2|15t1",
+  "from": "m2|15",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "선택적 프로그램을 정지시키기 위해 사용되는 보조기능은 M00이다.",
+  "tag": {
+   "box": "자주 나오는 M코드",
+   "item": "M01"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| M01 | 선택적 프로그램 정지 | M08 | 절삭유 ON |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "m2|17t1",
+  "from": "m2|17",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "시계방향 원호가공을 의미하는 준비기능은 G02이다.",
+  "tag": {
+   "box": "원호 보간 G02·G03",
+   "item": "G02"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "- G02: 시계 방향(CW), G03: 반시계 방향(CCW)",
+   "- 형식(선반): G02(G03) X_ Z_ R_ F_; — X·Z는 끝점, R은 원호 반지름"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "m2|27t1",
+  "from": "m2|27",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반에서 분당 이송지령을 위한 준비기능은 G96이다.",
+  "tag": {
+   "box": "이송 단위 지령",
+   "item": "G98"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| CNC 선반 | G98 | G99(기본) |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "m2|28t1",
+  "from": "m2|28",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반에서 공작물 좌표계 설정을 위한 준비기능은 G50이다.",
+  "tag": {
+   "box": "주축 속도 지령 G96·G97·G50",
+   "item": "G50"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| G50 | 주축 최고 회전수 제한(선반) | G50 S2500 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "a|6t1",
+  "from": "a|6",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "프로그램 작성자가 프로그램을 쉽게 작성하기 위하여 공작물 임의의 점을 원점으로 정해 명령의 기준점이 되도록 한 좌표계는 상대 좌표계이다.",
+  "tag": {
+   "box": "CNC 화면의 좌표 네 가지",
+   "item": "절대 좌표계"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "a|15t1",
+  "from": "a|15",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반에서 자동원점 복귀하는 준비기능은 G28이다.",
+  "tag": {
+   "box": "원점 복귀 관련 G코드",
+   "item": "G28"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| G28 | 자동 원점(제1원점) 복귀 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "a|16t1",
+  "from": "a|16",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반에서 일시정지(Dwell)하는 준비기능은 G00이다.",
+  "tag": {
+   "box": "개념 상자 없음: G04",
+   "item": "G04"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "a|20t1",
+  "from": "a|20",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "컴퓨터에 의한 통합 생산 시스템으로 설계, 제조, 생산, 관리 등을 통합하여 운영하는 시스템은 CIMS이다.",
+  "tag": {
+   "box": "자동화 생산 시스템 정리(작은 것 → 큰 것)",
+   "item": "CIMS"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| CIMS | 컴퓨터 통합 생산 시스템 | 설계·제조·생산·관리·영업을 컴퓨터로 통합 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "a|24t1",
+  "from": "a|24",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반에서 프로그램에서 주축회전수(rpm) 일정제어 G코드는 G96이다.",
+  "tag": {
+   "box": "절삭속도와 회전수, G96·G97",
+   "item": "G97"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "- **G97**: 회전수(rpm) 일정 제어 → S 값이 곧 rpm이다."
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "a|27t1",
+  "from": "a|27",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC 프로그램에서 공구기능에 속하는 어드레스(Address)는 T이다.",
+  "tag": {
+   "box": "CNC 선반 공구 기능 T□□△△",
+   "item": "T"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "- T0101: 1번 공구, 1번 보정값 적용",
+   "- T0100: 1번 공구, 보정 취소(00)"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "a|28t1",
+  "from": "a|28",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반에서 공구 인선 반지름 보정 취소를 하는 준비기능은 G41이다.",
+  "tag": {
+   "box": "공구 인선 반지름 보정",
+   "item": "G40"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| G40 | 인선 반지름 보정 취소 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "a|36t1",
+  "from": "a|36",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반의 원호 절삭에서 가공방향이 시계방향(CW)일 경우에 올바른 기능은 G02이다.",
+  "tag": {
+   "box": "자주 나오는 기본 G코드",
+   "item": "G02"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| G02 | 원호 절삭(시계, CW) | G30 | 제2·3·4 원점 복귀 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "a|37t1",
+  "from": "a|37",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC 프로그램에서 보조 프로그램(sub program)을 호출하는 보조기능은 M99이다.",
+  "tag": {
+   "box": "보조 프로그램(서브 프로그램) 호출과 복귀",
+   "item": "M98"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "- **주 프로그램**: M98 P1234; → O1234 보조 프로그램을 불러 실행한다.",
+   "- **보조 프로그램**: O1234 … M99; → 끝나면 주 프로그램의 M98 다음 블록으로 돌아간다."
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "a|38t1",
+  "from": "a|38",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반 가공 프로그램에서 반드시 전개번호를 사용해야 G코드는 G70이다.",
+  "tag": {
+   "box": "CNC 선반 복합형 고정 사이클(G70~G76)",
+   "item": "G70"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| G70 | 다듬(정삭) 절삭 사이클 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "a|39t1",
+  "from": "a|39",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "도면을 보고 프로그램을 작성할 때 절대 좌표계의 기준이 되는 점으로서 프로그램 원점 또는 공작물 원점이라고도 하는 좌표계는 상대 좌표계이다.",
+  "tag": {
+   "box": "CNC 화면의 좌표 네 가지",
+   "item": "공작물 좌표계"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "a|40t1",
+  "from": "a|40",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC선반에서 현재의 위치에서 다른 점을 경유하지 않고 X축만 기계원점으로 복귀하는 것은 G28 U0.;이다.",
+  "tag": {
+   "box": "개념 상자 없음: G28 U0.;",
+   "item": "G28 U0.;"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "a|43t1",
+  "from": "a|43",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC 공작기계에서 사용되는 좌표계 중 사용자가 임의로 변경해서 안 되는 좌표계는 기계 좌표계이다.",
+  "tag": {
+   "box": "CNC 화면의 좌표 네 가지",
+   "item": "기계 좌표계"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|15t1",
+  "from": "b|15",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "버니어 캘리퍼스, 마이크로미터 등이 대표적인 측정기로, 측정 대상물을 측정기의 눈금을 이용하여 직접 읽는 측정 방법은 간접 측정이다.",
+  "tag": {
+   "box": "직접·간접·비교 측정",
+   "item": "직접 측정"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| 직접 측정 | 눈금을 직접 읽음 | 버니어 캘리퍼스, 마이크로미터 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|16t1",
+  "from": "b|16",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "측정을 통해 얻어진 데이터를 가지고 계산으로 측정값을 얻는 방법은 간접측정이다.",
+  "tag": {
+   "box": "직접·간접·비교 측정",
+   "item": "간접측정"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| 간접 측정 | 다른 양을 재서 계산 | 사인바(각도), 삼침법(나사 유효지름) |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|24t1",
+  "from": "b|24",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "드릴의 홈 지름과 같은 골경의 측정에 쓰이는 것은 포인트 마이크로미터이다.",
+  "tag": {
+   "box": "마이크로미터의 원리와 종류",
+   "item": "포인트 마이크로미터"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "- 포인트 마이크로미터: 끝이 뾰족해 드릴 홈·좁은 골 지름 측정"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|29t1",
+  "from": "b|29",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "반지름을 측정하는 것은 시크니스 게이지이다.",
+  "tag": {
+   "box": "자주 나오는 게이지",
+   "item": "레이디어스 게이지"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|31t1",
+  "from": "b|31",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "스냅 게이지가 측정하는 곳은 바깥지름이다.",
+  "tag": {
+   "box": "한계 게이지",
+   "item": "바깥지름"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|37t1",
+  "from": "b|37",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "부척을 사용하여 길이를 측정하며 1/20 mm, 1/50 mm까지 정밀 측정이 가능한 것은 버니어 캘리퍼스이다.",
+  "tag": {
+   "box": "버니어 캘리퍼스 원리와 종류",
+   "item": "버니어 캘리퍼스"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|39t1",
+  "from": "b|39",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "버니어 캘리퍼스 부척의 한 눈금은 본척의 n-1개의 눈금을 n등분한 것이다. 본척의 한 눈금이 A라 한다면 측정 가능한 최소치는 n/A이다.",
+  "tag": {
+   "box": "버니어 캘리퍼스 원리와 종류",
+   "item": "A/n"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "- 최소 측정값 = 어미자 한 눈금 ÷ 아들자 등분 수 (**A/n**)"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|43t1",
+  "from": "b|43",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "원척의 한 눈금이 1 mm일 때 0.05 mm까지 측정하려고 한다. 부척의 눈금은 부척 눈금은 원척 19 mm를 20등분이다.",
+  "tag": {
+   "box": "버니어 캘리퍼스 원리와 종류",
+   "item": "부척 눈금은 원척 19 mm를 20등분"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|45t1",
+  "from": "b|45",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "버니어 캘리퍼스의 크기를 나타내는 것은 조의 길이이다.",
+  "tag": {
+   "box": "버니어 캘리퍼스 원리와 종류",
+   "item": "측정 가능한 최대 길이"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|49t1",
+  "from": "b|49",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "마이크로미터에 사용되는 나사는 3각 나사이다.",
+  "tag": {
+   "box": "마이크로미터의 원리와 종류",
+   "item": "3각 나사"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|51t1",
+  "from": "b|51",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "마이크로미터의 측정면의 평면도를 검사하는 기구는 투영기이다.",
+  "tag": {
+   "box": "마이크로미터 정밀도 검사",
+   "item": "옵티컬 플랫"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| 측정면 평면도 | 옵티컬 플랫 — 적색 간섭무늬 1개 ≈ 0.32 μm |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|52t1",
+  "from": "b|52",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "마이크로미터의 슬리브의 최소 눈금이 A이고, 딤블이 N등분 되어 있다면 최소 눈금 C를 나타내는 식은 C=1/N×A이다.",
+  "tag": {
+   "box": "마이크로미터의 원리와 종류",
+   "item": "C=1/N×A"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|53t1",
+  "from": "b|53",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "외측 마이크로미터에서 측정력을 주는 장치는 앤빌이다.",
+  "tag": {
+   "box": "마이크로미터의 원리와 종류",
+   "item": "래칫"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "- 사용: 0점 확인, 래칫 스톱으로 일정한 측정력, 스탠드 사용(체온 영향 줄임)"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|57t1",
+  "from": "b|57",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "본척의 눈금이 이동이 가능하여 0점 조정을 할 수 있는 하이트 게이지는 HT형이다.",
+  "tag": {
+   "box": "하이트 게이지",
+   "item": "HT형"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "| HT형 | 본척(어미자)을 움직여 0점 조정 가능, 가장 많이 쓰임 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|59t1",
+  "from": "b|59",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "나사 마이크로미터가 측정하는 것은 나사의 골 지름이다.",
+  "tag": {
+   "box": "마이크로미터의 원리와 종류",
+   "item": "나사 유효 지름"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|61t1",
+  "from": "b|61",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "1300~1500mm 정도의 안지름 측정시 적당한 것은 바형 내측 마이크로미터이다.",
+  "tag": {
+   "box": "아베의 원리",
+   "item": "바형 내측 마이크로미터"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|66t1",
+  "from": "b|66",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "마이크로미터의 종합 정도 검사 시 기준이 되는 것은 다이얼 게이지이다.",
+  "tag": {
+   "box": "마이크로미터 정밀도 검사",
+   "item": "블록 게이지"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| 종합 오차(기기 오차) | 블록 게이지를 기준으로 여러 점을 재어 비교 |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|67t1",
+  "from": "b|67",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "외경 마이크로미터에서 프레임의 우측에 있는 클램프의 역할은 스핀들 고정이다.",
+  "tag": {
+   "box": "마이크로미터의 원리와 종류",
+   "item": "스핀들 고정"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|72t1",
+  "from": "b|72",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "정밀 게이지 측정에 쓰이며 1~2m 되는 것도 높은 정밀도로 측정할 수 있는 것은 블록 게이지이다.",
+  "tag": {
+   "box": "아베의 원리",
+   "item": "측장기"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "- 맞는 것: 외측 마이크로미터, 단체형 내측 마이크로미터, 측장기"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|83t1",
+  "from": "b|83",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "블록 게이지를 완성시키는 것은 연삭이다.",
+  "tag": {
+   "box": "블록 게이지",
+   "item": "래핑"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "- 완성 가공: **래핑**(아주 고운 랩제로 면을 다듬음)"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|85t1",
+  "from": "b|85",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "슬립 게이지라고도 하며 정확한 치수로 제작된 수십 개의 조각으로 이루어진 측정기는 블록 게이지이다.",
+  "tag": {
+   "box": "블록 게이지",
+   "item": "블록 게이지"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|88t1",
+  "from": "b|88",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "블록 게이지의 등급이 정밀한 것부터 나열된 것은 K-0-1-2이다.",
+  "tag": {
+   "box": "블록 게이지 등급과 용도",
+   "item": "K-0-1-2"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|97t1",
+  "from": "b|97",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "블록 게이지의 밀착력과 관계 있는 것은 측정면의 평행도이다.",
+  "tag": {
+   "box": "블록 게이지",
+   "item": "측정면의 평면도"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|102t1",
+  "from": "b|102",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "다량의 제품이 치수 허용 범위에 있는가를 검사하는데 적합한 것은 한계 게이지이다.",
+  "tag": {
+   "box": "한계 게이지",
+   "item": "한계 게이지"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|109t1",
+  "from": "b|109",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "지름이 큰 원을 그릴 때 사용되는 측정기는 콤비네이션 베벨이다.",
+  "tag": {
+   "box": "개념 상자 없음: 트로멜",
+   "item": "트로멜"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|117t1",
+  "from": "b|117",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "컴비네이션 세트가 측정하는 것은 평행도이다.",
+  "tag": {
+   "box": "개념 상자 없음: 각도",
+   "item": "각도"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|135t1",
+  "from": "b|135",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "공구 현미경과 투영기 가운데서 투영기를 사용하는 것이 좋은 것은 윤곽 곡선 측정이다.",
+  "tag": {
+   "box": "투영기와 공구 현미경",
+   "item": "윤곽 곡선 측정"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|141t1",
+  "from": "b|141",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "분도기에다 강철자, 직각자 등을 조합하여 각도 중심내기 등에 쓰이는 것은 만능 분도기이다.",
+  "tag": {
+   "box": "개념 상자 없음: 콤비네이션 세트",
+   "item": "콤비네이션 세트"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|142t1",
+  "from": "b|142",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "빛의 간섭무늬의 유무를 광학적인 방법으로 찾아보는 데 쓰이는 평면도 측정기는 옵티컬 플랫이다.",
+  "tag": {
+   "box": "옵티컬 플랫과 간섭무늬",
+   "item": "옵티컬 플랫"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [
+   "- 옵티컬 플랫(옵티컬 플레이트, 광선 정반): 한 면을 아주 평평하게 연마한 유리판"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|148t1",
+  "from": "b|148",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "부품의 길이 측정에 쓰이는 측정기기 중 실제 치수와 표준 치수와의 차를 측정하는 것은 버니어 캘리퍼스이다.",
+  "tag": {
+   "box": "개념 상자 없음: 다이얼 게이지",
+   "item": "다이얼 게이지"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "b|150t1",
+  "from": "b|150",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "길이 측정 시 오차를 최소로 줄이기 위해서 ‘표준자와 피측정물은 동일 축선상에 위치하여야 한다’는 원리는 아베의 원리이다.",
+  "tag": {
+   "box": "개념 상자 없음: 아베의 원리",
+   "item": "아베의 원리"
+  },
+  "ans": "O",
+  "ansText": "O",
+  "basis": [],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ },
+ {
+  "id": "sman|16t1",
+  "from": "sman|16",
+  "kind": "가",
+  "src": "new",
+  "t": "진위형",
+  "stem": "CNC 밀링에서 절삭속도의 단위로 바른 것은 mm/rev이다.",
+  "tag": {
+   "box": "절삭 조건의 단위와 공식",
+   "item": "m/min"
+  },
+  "ans": "X",
+  "ansText": "X",
+  "basis": [
+   "| 절삭속도 V | m/min | V = π D N / 1000 |",
+   "| 이송 F(밀링) | mm/min | F = fz × z × N |"
+  ],
+  "verify": {
+   "blind": "GPT·Cursor 블라인드 풀이 일치 (quiz_plus\\work\\1124c\\results.json)"
+  }
+ }
+]

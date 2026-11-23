@@ -238,6 +238,7 @@ const FORMULAS={
   tapF:v=>v.N*v.P,                      // 탭 이송 F = N × 리드(1줄 = 피치)
   drill:v=>v.D-v.P,                     // 기초 드릴 d = D − p
   micro:v=>v.P/v.n*v.k,                 // 마이크로미터 이동량
+  microRead:v=>v.S+v.P/v.n*v.k,         // 마이크로미터 읽음 = 슬리브 + 심블 눈금 × (피치 ÷ 등분 수)
   vernier:v=>1/v.n,                     // 버니어 최소 눈금 = 1 ÷ 등분 수
   tol:v=>v.U-v.L,                       // 치수 공차
   maxClear:v=>v.HU-v.SL,                // 최대 틈새

@@ -48,8 +48,12 @@ for n in new_src:
     v = n.get("verify") or {}
     if not v.get("blind"):
         err(f"{n['id']} 블라인드 풀이 기록 없음")
-    if n.get("kind") == "나" and not (v.get("level", {}).get("gpt") == "같음" and v.get("level", {}).get("cursor") == "같음"):
-        err(f"{n['id']} 쌍둥이 난이도가 '같음'이 아님")
+    lv = v.get("level", {})
+    def lv_ok(x):
+        # '같음'(1차 묶음 규칙) 또는 '차이 n'(n ≤ 2, 2026-11-23 사용자 결정: 여섯 기준 중 한두 개 차이 허용)
+        return x == "같음" or (isinstance(x, str) and x.startswith("차이 ") and int(x[3:]) <= 2)
+    if n.get("kind") == "나" and not (lv_ok(lv.get("gpt")) and lv_ok(lv.get("cursor"))):
+        err(f"{n['id']} 쌍둥이 난이도 기준 미달")
 
 # 4. 4지: exChoice는 정답 자리만 비어 있다
 for q in QS:
