@@ -57,8 +57,11 @@ def auto_noshuffle(q):
     return None
 
 
+OPEN_BLOCK = set(lines(os.path.join(P, "src", "open_block.txt")))  # 두 AI가 주관식 부적합으로 본 문항(open_review.py)
+
+
 def auto_open(q):
-    if q.get("fig") or NOT_OPEN.search(q["stem"]):
+    if q.get("fig") or NOT_OPEN.search(q["stem"]) or q["id"] in OPEN_BLOCK:
         return None
     a = q["choices"][q["ans"]]
     core = re.sub(r"\([^)]*\)", "", a).strip()
