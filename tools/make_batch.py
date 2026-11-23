@@ -76,6 +76,8 @@ for it in items:
     key = sq(choices[ans]) if t == "4지선다" else sq(item) if t == "진위형" else sq((accept or [str(value)])[0])
     q["basis"] = [l for l in body if key and key in sq(l)][:2]
     if t == "진위형":
+        # 해설(근거·개념 상자)을 붙인 뒤 넘어간다 — 처음 판은 이 줄 없이 넘어가 진위형에 해설이 빠졌다(2026-11-23 고침)
+        q["ex"] = {"근거": basis_txt, "개념": ex0.get("개념")} if ex0.get("개념") else {"근거": basis_txt}
         out.append(q)
         continue
     if not q["basis"] and t != "계산형":

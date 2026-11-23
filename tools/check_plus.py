@@ -64,6 +64,11 @@ for q in QS:
         elif q["src"] == "old" and sum(x is None for x in ec) != 1:
             err(f"{q['id']} 오답 이유 빠짐")
 
+# 4-1. 모든 문항에 해설 근거가 있다(2026-11-23: 새 진위형 253문항에 해설이 빠졌던 일을 막기 위함)
+for q in QS:
+    if not ((q.get("ex") or {}).get("근거") or "").strip():
+        err(f"{q['id']} 해설 근거 없음")
+
 # 5. 주관식 대상 지문
 for q in QS:
     if q.get("open") and re.search(r"옳|틀린|아닌|않|없는|것은", q["stem"]):
