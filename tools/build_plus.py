@@ -63,6 +63,8 @@ OPEN_BLOCK = set(lines(os.path.join(P, "src", "open_block.txt")))  # 두 AI가 �
 def auto_open(q):
     if q.get("fig") or NOT_OPEN.search(q["stem"]) or q["id"] in OPEN_BLOCK:
         return None
+    if q.get("src") == "old":   # 2026-11-23 사용자 요청: 변형하지 않은 기존 객관식은 주관식 모드에서도 그대로 4지로
+        return None
     a = q["choices"][q["ans"]]
     core = re.sub(r"\([^)]*\)", "", a).strip()
     if not core or len(norm(core)) > 14 or len(core.split()) > 3 or re.search(r"[,→~:=±]", core):
