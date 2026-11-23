@@ -5,6 +5,8 @@
  * 처음 한 번: 함수 목록에서 '설정하기' 실행 → 배포 > 새 배포 > 웹 앱(실행: 나, 액세스: 모든 사용자)
  *            → 웹 앱 주소를 docs/index.html 의 SHEET_URL 에 넣는다.
  * 고친 뒤: 저장 + 배포 관리 > 수정 > 새 버전 (doGet·doPost가 바뀐 경우)
+ * 교사용 화면: 앱 주소 뒤에 #teacher. 비밀번호는 TEACHER_PW_INIT에 적고 '설정하기'를 실행해 저장한다.
+ *   시험 열기·닫기, 회차·제한 시간, 결과 보기, 기록표용 CSV 내려받기를 그 화면에서 한다(시트를 열 필요 없음).
  *
  * 탭
  *   설정    : B1 회차(기록표 회차 이름과 똑같이, 예: 8회차) / B2 상태(열림·닫힘) / B3 제한 시간(분)
@@ -20,6 +22,10 @@ const HEAD = {
   [T_REP]: ['시각', '문항 id', '보인 내용', '사유', '처리']
 };
 const REPORT_PER_DAY = 50;   // 같은 문항 신고를 하루에 받는 최대 수
+// 교사용 화면(#teacher) 비밀번호. 붙여 넣은 뒤 여기에 적고 '설정하기'를 한 번 실행하면 스크립트 속성에 저장된다.
+// 공개 저장소에는 비워 둔다(저장된 뒤에는 이 줄을 다시 비워도 된다).
+const TEACHER_PW_INIT = '';
+const PW_FAIL_LIMIT = 10;     // 10분 안에 비밀번호를 이만큼 틀리면 10분 동안 교사용 명령을 막는다
 
 /* ---------- 공통 ---------- */
 function ss_() {
@@ -56,6 +62,7 @@ function 설정하기() {
   const id = props.getProperty('SHEET_ID');
   const ss = id ? SpreadsheetApp.openById(id) : (SpreadsheetApp.getActive() || SpreadsheetApp.create('기우제플러스 기록'));
   props.setProperty('SHEET_ID', ss.getId());
+  if (TEACHER_PW_INIT) { props.setProperty('TEACHER_PW', String(TEACHER_PW_INIT)); Logger.log('교사용 비밀번호를 저장했습니다.'); }
   Logger.log('기록 시트 주소: ' + ss.getUrl());
   const st = tab_(ss, T_SET);
   st.getRange('A1:A3').setValues([['회차'], ['상태'], ['제한 시간(분)']]).setFontWeight('bold');
@@ -87,6 +94,7 @@ function doPost(e) {
       const ss = ss_();
       if (d.kind === 'exam') return out_(exam_(ss, d));
       if (d.kind === 'report') return out_(report_(ss, d));
+      if (d.kind === 'admin') return out_(admin_(ss, d));
       return out_({ ok: false, error: 'kind' });
     } finally { lock.releaseLock(); }
   } catch (err) {
@@ -123,6 +131,42 @@ function report_(ss, d) {
   if (cnt >= REPORT_PER_DAY) return { ok: true, skipped: true };
   sh.appendRow([new Date(), safe_(id), safe_(String(d.shown || '').slice(0, 200)), safe_(String(d.memo || '').slice(0, 100)), '']);
   return { ok: true };
+}
+
+/* ---------- 교사용 화면(#teacher) ---------- */
+// action: status(현황만) | open(회차·시간을 적고 열림) | close(닫힘) | record(기록표용 탭 만들기)
+function admin_(ss, d) {
+  const pw = PropertiesService.getScriptProperties().getProperty('TEACHER_PW') || '';
+  const cache = CacheService.getScriptCache();
+  const fails = Number(cache.get('pwfail') || 0);
+  if (!pw) return { ok: false, error: 'nopw' };
+  if (fails >= PW_FAIL_LIMIT) return { ok: false, error: 'locked' };
+  if (String(d.pw || '') !== pw) { cache.put('pwfail', String(fails + 1), 600); return { ok: false, error: 'pw' }; }
+  const st = tab_(ss, T_SET);
+  const a = String(d.action || 'status');
+  if (a === 'open') {
+    const r = String(d.round || '').replace(/\s+/g, ' ').trim().slice(0, 20);
+    const m = Math.max(1, Math.min(180, Math.round(Number(d.minutes) || 30)));
+    if (!r) return { ok: false, error: 'round' };
+    st.getRange('B1:B3').setValues([[safe_(r)], ['열림'], [m]]);
+  } else if (a === 'close') {
+    st.getRange('B2').setValue('닫힘');
+  } else if (a === 'record') {
+    기록표용_만들기(String(d.round || '').trim() || undefined);
+  }
+  const cfg = config_(ss);
+  cfg.state = String(st.getRange('B2').getValue()).trim();
+  const round = String(d.round || '').trim() || cfg.round;
+  const sh = tab_(ss, T_RES);
+  const n = sh.getLastRow();
+  const all = n >= 2 ? sh.getRange(2, 1, n - 1, 7).getValues() : [];
+  const rounds = [];
+  all.forEach(r => { const k = String(r[0]).replace(/^'/, ''); if (k && rounds.indexOf(k) < 0) rounds.push(k); });
+  const rows = all.filter(r => String(r[0]).replace(/^'/, '') === round).map(r => ({
+    name: String(r[1]).replace(/^'/, ''), score: r[2], leaves: r[3], status: String(r[4]),
+    at: r[5] instanceof Date ? r[5].toISOString() : String(r[5])
+  }));
+  return { ok: true, cfg: cfg, round: round, rows: rows, rounds: rounds };
 }
 
 /* ---------- 기록표에 넣기 ---------- */
