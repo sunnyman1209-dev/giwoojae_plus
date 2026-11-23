@@ -487,7 +487,8 @@ function finish(g,opt={}){
   S.res[id]=g;S.retry=S.retry.filter(r=>r.id!==id);
   if(g!=="o")S.retry.push({id,due:S.count+10+rint(11)});
   lsave();lheader();
-  if(g==="o"&&!opt.canOverride){setAct([]);document.querySelectorAll("#fb .kw input").forEach(i=>i.disabled=true);toast();autoNext=setTimeout(lnext,800);return}
+  // 정답이어도 해설을 보여 주고 '다음 문제'로 넘어간다(2026-11-23 요청: 맞혀도 해설 보기)
+  if(g==="o")toast();
   renderFeedback(g,opt)}
 function renderFeedback(g,opt){
   let h=`<div class="verdict ${g==="o"?"ok":g==="m"?"mid":"no"}">${g==="o"?"정답":g==="m"?"△ 일부 맞음":"오답"}</div>`;
