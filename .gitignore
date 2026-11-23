@@ -1,0 +1,4 @@
+work/
+.cursor-delegate/
+.gpt-delegate/
+__pycache__/
