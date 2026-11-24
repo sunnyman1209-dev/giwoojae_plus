@@ -5,6 +5,10 @@ from pathlib import Path
 
 Q = Path(__file__).resolve().parents[1]
 Z = Q.parent / "quiz"
+if not Z.is_dir():  # 작업틀(worktree)에서 돌릴 때: 원래 저장소 옆의 quiz 폴더를 쓴다
+    import subprocess
+    _c = subprocess.run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=Q, capture_output=True, text=True).stdout.strip()
+    Z = Path(_c).parent.parent / "quiz"
 OLD = {q["id"]: q for q in json.loads((Z / "docs" / "data" / "questions.json").read_text(encoding="utf-8"))["questions"]}
 H = json.loads((Q / "work" / "1123" / "보류.json").read_text(encoding="utf-8"))
 C, K = "①②③④", "㉠㉡㉢㉣"

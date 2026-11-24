@@ -6,6 +6,10 @@ import glob, json, os, re, sys
 sys.stdout.reconfigure(encoding="utf-8")
 P = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 H = os.path.dirname(P)
+if not os.path.isdir(os.path.join(H, "quiz")):  # 작업틀(worktree)에서 돌릴 때: 원래 저장소 옆의 quiz 폴더를 쓴다
+    import subprocess
+    _c = subprocess.run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=P, capture_output=True, text=True).stdout.strip()
+    H = os.path.dirname(os.path.dirname(_c))
 sys.path.insert(0, os.path.join(H, "tools"))
 from hs import parse  # noqa: E402
 
