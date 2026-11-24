@@ -19,11 +19,10 @@ if not os.path.isdir(os.path.join(H, "quiz")):  # 작업틀(worktree)에서 돌�
     _c = subprocess.run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=P, capture_output=True, text=True).stdout.strip()
     H = os.path.dirname(os.path.dirname(_c))
 # 저장소 밖(git 제외) work 폴더: 작업틀에 없으면 원래 저장소의 work를 쓴다
-W = os.path.join(P, "work")
-if not os.path.isdir(W):
-    import subprocess
-    _g = subprocess.run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=P, capture_output=True, text=True).stdout.strip()
-    W = os.path.join(os.path.dirname(_g), "work")
+# 작업틀에 묶음 작업용 work 폴더가 따로 생겨도 승인 문항은 원래 저장소 work에서 찾도록 둘 다 본다.
+import subprocess
+_g = subprocess.run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=P, capture_output=True, text=True).stdout.strip()
+WS = list(dict.fromkeys(os.path.normcase(os.path.abspath(w)) for w in (os.path.join(P, "work"), os.path.join(os.path.dirname(_g), "work")) if os.path.isdir(w)))
 CIRC = "①②③④⑤⑥"
 
 
@@ -118,7 +117,7 @@ def main():
         new += json.load(open(f, encoding="utf-8"))
     approved = set(lines(os.path.join(P, "src", "approved.txt")))
     if approved:
-        for f in glob.glob(os.path.join(W, "*", "보류.json")):
+        for f in [f for w in WS for f in glob.glob(os.path.join(w, "*", "보류.json"))]:
             new += [n for n in json.load(open(f, encoding="utf-8")) if n["id"] in approved]
     for n in new:
         n = {k: v for k, v in n.items() if k not in ("verify", "calcExpr", "basis")}
@@ -150,8 +149,9 @@ def main():
                 q["noShuffle"] = True
                 stats["섞지 않음"] += 1
             op = auto_open(q)
+            extra = q.pop("openExtra", None) or []   # 문항 파일에 적은 주관식 인정 답 동의어(작업표 02, 두 AI 검토)
             if op:
-                q["open"] = op
+                q["open"] = op + [a for a in extra if a not in op]
                 stats["주관식 대상"] += 1
         ok = (t in ("진위형", "4지선다") and q.get("ans") is not None) \
             or (t == "연결형" and q.get("left") and q.get("right") and q.get("ans")) \
