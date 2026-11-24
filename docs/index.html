@@ -250,7 +250,13 @@ const FORMULAS={
   tol:v=>v.U-v.L,                       // 치수 공차
   maxClear:v=>v.HU-v.SL,                // 최대 틈새
   maxInterf:v=>v.SU-v.HL,               // 최대 죔새
-  dwell:v=>60/v.N*v.k                   // 드웰 시간
+  dwell:v=>60/v.N*v.k,                  // 드웰 시간
+  lead:v=>v.n*v.P,                      // 리드 L = 줄 수 × 피치 (작업표 03)
+  gearTip:v=>v.m*(v.Z+2),               // 표준 평기어 이끝원 지름 = m(Z + 2)
+  feedV:v=>v.fz*v.Z*1000*v.V/(Math.PI*v.D), // 절삭속도로 회전수를 구한 뒤 테이블 이송 F = fz × Z × N
+  scale:v=>v.s*v.k,                     // 눈금 간격 × 눈금 수
+  cutSec:v=>v.L/v.F*60,                 // 가공 시간[초] = 길이 ÷ 이송속도 × 60
+  mrr:v=>v.W*v.t*v.F/1000               // 재료 제거율[cm³/분] = 폭 × 깊이 × 이송 ÷ 1000
 };
 /* 사칙연산만 읽는 작은 계산기(eval을 쓰지 않는다) */
 function arith(src,vars){
