@@ -7,7 +7,7 @@ const html = fs.readFileSync(path.join(P, "docs", "index.html"), "utf8");
 const code = html.split("/* ===== ENGINE-START")[1].split("/* ===== ENGINE-END")[0].replace(/^[^\n]*\n/, "");
 const ctx = { CIRC: "①②③④⑤⑥", console, Math };
 vm.createContext(ctx);
-vm.runInContext(code + "\nthis.E={norm,FORMULAS,fillT,pickVals,makeInst,view,calcOk,shortOk,buildExam,scoreExam,tagKey,EXAM_PLAN,pointsOf,selfMarkable,selfMark};", ctx);
+vm.runInContext(code + "\nthis.E={norm,FORMULAS,fillT,pickVals,makeInst,view,calcOk,shortOk,buildExam,scoreExam,examResult,tagKey,EXAM_PLAN,pointsOf,selfMarkable,selfMark};", ctx);
 const E = ctx.E;
 const DB = JSON.parse(fs.readFileSync(path.join(P, "docs", "data", "questions.json"), "utf8"));
 const BY = {}; DB.questions.forEach(q => BY[q.id] = q);
@@ -123,6 +123,26 @@ for (let k = 0; k < 1000; k++) {
     if (E.scoreExam(BY, items, oneWrong).score !== 98) bad("연결형 한 짝 틀림은 0점이어야 함");
   }
 }
+// ---------- 결과 다시 보기(SPEC_1124 D): 기기에 남긴 시험지·답으로 같은 결과를 다시 만든다 ----------
+for (let k = 0; k < 200; k++) {
+  const items = E.buildExam(DB.questions);
+  const a = {};
+  items.forEach((it, i) => { const q = BY[it.id], v = E.view(q, it), r = Math.random();
+    if (r < 0.2) return;   // 비움
+    a[i] = r < 0.6 ? (q.t === "진위형" ? q.ans : q.t === "4지선다" ? v.ansPos : q.t === "연결형" ? q.ans.slice() : q.t === "단답형" ? q.accept[0] : v.ansText)
+      : (q.t === "진위형" ? (q.ans === "O" ? "X" : "O") : q.t === "4지선다" ? (v.ansPos + 1) % v.choices.length : q.t === "연결형" ? q.ans.map(() => 0) : "엉뚱한 답"); });
+  const rec = { items, a };
+  const first = E.examResult(BY, rec);
+  if (first.score !== E.scoreExam(BY, items, items.map((_, i) => a[i])).score) bad("제출 점수와 결과 점수가 다름");
+  const again = E.examResult(BY, JSON.parse(JSON.stringify(rec)));   // 기기에 저장했다가 다시 읽은 기록
+  if (again.score !== first.score || again.ok.join() !== first.ok.join()) bad("다시 연 결과가 제출 때와 다름", first.score, again.score);
+  if (first.rows.some((x, i) => x.pts !== (x.ok ? E.pointsOf(BY[items[i].id].t) : 0))) bad("문항별 얻은 점수");
+  const back = JSON.parse(JSON.stringify(rec));
+  if (items.some((it, i) => { const q = BY[it.id]; return E.view(q, it).ansText !== E.view(q, back.items[i]).ansText; })) bad("다시 연 시험지의 정답 표시가 다름");
+}
+if (E.examResult(BY, { items: [{ id: "없는 문항" }], a: { 0: "x" } }).score !== 0) bad("사라진 문항은 0점");
+if (E.examResult(BY, { items: [{ id: "g1|6", o: [0, 1, 2, 3] }], a: {} }).rows[0].mine !== null) bad("비운 답은 null");
+
 console.log("시험지 1,000번: 새 문항 수 분포", JSON.stringify(newCnt), "· 유형별 새 문항 누계", JSON.stringify(typeNew));
 console.log(fail ? `실패 ${fail}건` : "모두 통과");
 process.exit(fail ? 1 : 0);

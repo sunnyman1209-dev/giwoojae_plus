@@ -10,7 +10,8 @@
  *
  * 탭
  *   설정    : B1 회차(기록표 회차 이름과 똑같이, 예: 8회차) / B2 상태(열림·닫힘) / B3 제한 시간(분)
- *   결과    : 제출 한 번에 한 줄. 회차 | 이름 | 점수 | 탭 이탈 | 상태 | 제출 시각 | 브라우저
+ *   결과    : 제출 한 번에 한 줄. 회차 | 이름 | 점수 | 탭 이탈 | 상태 | 제출 시각 | 브라우저 | 제출 번호
+ *             제출 번호는 제출 응답으로 학생 기기에 돌려주며, 기기의 '내 시험 결과'와 이 줄을 잇는 열쇠다.
  *   기록표용 : '기록표용_만들기'를 실행하면 설정 회차의 첫 응시만 이름 | 점수 로 정리한다(CSV로 내려받아 점수표에 넣음)
  *   신고    : 학습 화면의 '이 문제 이상해요'. 시각 | 문항 id | 보인 내용 | 사유 | 처리
  *            '맞음으로 표시'를 누르면 사유 칸이 '인정 답안 제안: (학생 답)'인 줄이 들어간다(학번·이름 없음).
@@ -18,7 +19,7 @@
 
 const T_SET = '설정', T_RES = '결과', T_REC = '기록표용', T_REP = '신고';
 const HEAD = {
-  [T_RES]: ['회차', '이름', '점수', '탭 이탈', '상태', '제출 시각', '브라우저'],
+  [T_RES]: ['회차', '이름', '점수', '탭 이탈', '상태', '제출 시각', '브라우저', '제출 번호'],
   [T_REC]: ['이름', '점수'],
   [T_REP]: ['시각', '문항 id', '보인 내용', '사유', '처리']
 };
@@ -70,7 +71,7 @@ function 설정하기() {
   if (!st.getRange('B2').getValue()) st.getRange('B2').setValue('닫힘');
   if (!st.getRange('B3').getValue()) st.getRange('B3').setValue(30);
   st.getRange('B2').setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(['열림', '닫힘'], true).build());
-  st.getRange('A5').setValue('회차는 기록표의 회차 이름과 똑같이 적는다(예: 8회차). 시험을 열 때 상태를 열림, 끝나면 닫힘으로 바꾼다. 닫히면 학생 화면에 해설이 공개된다.');
+  st.getRange('A5').setValue('회차는 기록표의 회차 이름과 똑같이 적는다(예: 8회차). 시험을 열 때 상태를 열림, 끝나면 닫힘으로 바꾼다. 학생은 제출 직후 점수·정답·해설을 본다.');
   [T_RES, T_REC, T_REP].forEach(n => tab_(ss, n));
   const s1 = ss.getSheetByName('시트1'); if (s1 && ss.getSheets().length > 1) ss.deleteSheet(s1);
   Logger.log('설정 완료');
@@ -112,15 +113,22 @@ function exam_(ss, d) {
   if (!name || !Number.isInteger(score) || score < 0 || score > 100 || !round || round !== cfg.round)
     return { ok: false, error: 'bad data' };
   const sh = tab_(ss, T_RES);
+  if (!sh.getRange(1, 8).getValue()) sh.getRange(1, 8).setValue(HEAD[T_RES][7]).setFontWeight('bold');   // 예전 판 결과 탭
   const n = sh.getLastRow();
-  const rows = n >= 2 ? sh.getRange(2, 1, n - 1, 2).getValues() : [];
+  const rows = n >= 2 ? sh.getRange(2, 1, n - 1, 8).getValues() : [];
+  // 앱이 만든 제출 번호를 쓴다. 같은 번호가 이미 있으면 다시 보낸 것이므로 줄을 늘리지 않는다.
+  const sid = /^[a-z0-9]{6,24}$/.test(String(d.sid || '')) ? String(d.sid) : newSid_();
+  const dup = rows.find(r => String(r[7]) === sid);
+  if (dup) return { ok: true, status: String(dup[4]), sid: sid };
   const again = rows.some(r => String(r[0]) === round && norm_(r[1]) === norm_(name));
   const st = [again ? '재응시' : '첫 응시'];
   if (!cfg.open) st.push('마감 후');
   const when = d.submitted ? new Date(d.submitted) : new Date();
-  sh.appendRow([safe_(round), safe_(name), score, leaves, st.join(', '), isNaN(when) ? new Date() : when, safe_(String(d.browser || '').slice(0, 60))]);
-  return { ok: true, status: st.join(', ') };
+  sh.appendRow([safe_(round), safe_(name), score, leaves, st.join(', '), isNaN(when) ? new Date() : when, safe_(String(d.browser || '').slice(0, 60)), sid]);
+  return { ok: true, status: st.join(', '), sid: sid };
 }
+// 제출 번호: 영문 소문자·숫자 12자(시각 + 무작위)
+function newSid_() { return (Date.now().toString(36) + Math.random().toString(36).slice(2, 8) + '000000').slice(0, 12); }
 
 function report_(ss, d) {
   const id = String(d.id || '').slice(0, 60);

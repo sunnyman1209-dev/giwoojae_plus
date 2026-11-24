@@ -54,11 +54,24 @@ ok(r.ok && r.cfg.open && r.cfg.round === "8회차" && r.cfg.minutes === 40, "열
 ok(JSON.parse(ctx.doGet({ parameter: { action: "config" } }).s).open === true, "학생 화면 설정 읽기(열림)");
 ok(post({ kind: "exam", round: "8회차", name: "가나다", score: 80, leaves: 1, submitted: new Date().toISOString(), browser: "크롬" }).ok, "제출 1");
 ok(post({ kind: "exam", round: "8회차", name: "가 나다", score: 90, leaves: 0, submitted: new Date().toISOString(), browser: "크롬" }).status === "재응시", "재응시 표시");
+// 제출 번호(SPEC_1124 D): 응답으로 돌려주고 결과 탭 '제출 번호' 칸에 남긴다
+const resTab = () => sheets["결과"], col = h => resTab().d[0].indexOf(h);
+ok(col("제출 번호") >= 0, "결과 탭에 제출 번호 칸");
+const subRow = sid => resTab().d.slice(1).filter(row => row[col("제출 번호")] === sid);
+const s1 = post({ kind: "exam", round: "8회차", name: "사아자", score: 60, leaves: 0, sid: "k3x9a7qz2m", browser: "크롬" });
+ok(s1.ok && s1.sid === "k3x9a7qz2m" && subRow("k3x9a7qz2m").length === 1, "앱이 만든 제출 번호를 그대로 돌려줌");
+const s2 = post({ kind: "exam", round: "8회차", name: "사아자", score: 60, leaves: 0, sid: "k3x9a7qz2m", browser: "크롬" });
+ok(s2.ok && s2.sid === "k3x9a7qz2m" && subRow("k3x9a7qz2m").length === 1 && s2.status === s1.status, "같은 제출 번호로 다시 보내면 줄을 늘리지 않음");
+const s3 = post({ kind: "exam", round: "8회차", name: "차카타", score: 50, leaves: 0, browser: "크롬" });
+const s4 = post({ kind: "exam", round: "8회차", name: "파하", score: 40, leaves: 0, sid: "=bad id!", browser: "크롬" });
+ok(s3.ok && /^[a-z0-9]{6,24}$/.test(s3.sid) && s4.ok && /^[a-z0-9]{6,24}$/.test(s4.sid) && s3.sid !== s4.sid, "제출 번호가 없거나 잘못되면 시트가 새로 만듦");
+ok(subRow(s3.sid).length === 1 && subRow(s4.sid).length === 1, "새로 만든 제출 번호도 결과 탭에 남음");
+ok(post({ kind: "exam", round: "9회차", name: "가", score: 40, sid: "zzzzzz1" }).ok === false && subRow("zzzzzz1").length === 0, "잘못된 제출은 번호를 주지 않음");
 r = post({ kind: "admin", pw: "test-pw-0000", action: "close", round: "8회차" });
-ok(r.ok && r.cfg.state === "닫힘" && r.rows.length === 2, "닫기·결과 2건");
+ok(r.ok && r.cfg.state === "닫힘" && r.rows.length === 5, "닫기·결과 5건");
 ok(post({ kind: "exam", round: "8회차", name: "라마바", score: 70, leaves: 0, browser: "크롬" }).status.includes("마감 후"), "닫은 뒤 제출은 마감 후");
 r = post({ kind: "admin", pw: "test-pw-0000", action: "record", round: "8회차" });
-ok(r.ok && sheets["기록표용"].getLastRow() === 3, "기록표용 만들기(첫 응시 2명)");
+ok(r.ok && sheets["기록표용"].getLastRow() === 6, "기록표용 만들기(첫 응시 5명)");
 // 인정 답안 제안 (SPEC_1124 D): 문항 번호와 학생 답만 신고 탭에, 학번·이름은 남기지 않는다
 r = post({ kind: "suggest", id: "g1|3", answer: "크레이터마모", shown: "주관식", name: "가나다" });
 ok(r.ok, "인정 답안 제안 받기");
