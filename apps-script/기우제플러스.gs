@@ -11,24 +11,25 @@
  * 탭
  *   설정    : B1 회차(기록표 회차 이름과 똑같이, 예: 8회차) / B2 상태(열림·닫힘) / B3 제한 시간(분)
  *   결과    : 제출 한 번에 한 줄. 회차 | 이름 | 점수 | 탭 이탈 | 상태 | 제출 시각 | 브라우저 | 제출 번호
- *             | 문항 채점 | 원래 점수 | 맞음 처리 문항
+ *             | 문항 채점 | 원래 점수 | 맞음 처리 문항 | 고침 순번
+ *             고침 순번은 마지막으로 반영한 점수 고치기 요청의 순번(학생이 누른 시각)이다. 늦게 온 예전 요청을 무시하는 데 쓴다.
  *             제출 번호는 제출 응답으로 학생 기기에 돌려주며, 기기의 '내 시험 결과'와 이 줄을 잇는 열쇠다.
  *             문항 채점은 문항마다 유형 글자(T 진위·M 연결·C 4지선다·S 단답·N 계산·D 서술) + o/x 이다.
  *             점수는 학생 기기가 보낸 값이 아니라 이 채점과 시트의 배점(PTS)으로 계산한다.
  *             학생이 시험 결과 화면에서 '맞음으로 표시'를 누르면(kind:"fix") 점수 칸을 고친 점수로 바꾸고
  *             원래 점수·맞음 처리 문항 번호를 옆 칸에 남긴다. 모두 되돌리면 옆 칸을 비운다.
  *   기록표용 : '기록표용_만들기'를 실행하면 설정 회차의 첫 응시만 이름 | 점수 로 정리한다(CSV로 내려받아 점수표에 넣음)
- *   신고    : 학습 화면의 '이 문제 이상해요'. 시각 | 문항 id | 보인 내용 | 사유 | 처리
+ *   신고    : 학습 화면의 '이 문제 신고'. 시각 | 문항 id | 보인 내용 | 사유 | 처리
  *            '맞음으로 표시'를 누르면 사유 칸이 '인정 답안 제안: (학생 답)'인 줄이 들어간다(학번·이름 없음).
  */
 
 const T_SET = '설정', T_RES = '결과', T_REC = '기록표용', T_REP = '신고';
 const HEAD = {
-  [T_RES]: ['회차', '이름', '점수', '탭 이탈', '상태', '제출 시각', '브라우저', '제출 번호', '문항 채점', '원래 점수', '맞음 처리 문항'],
+  [T_RES]: ['회차', '이름', '점수', '탭 이탈', '상태', '제출 시각', '브라우저', '제출 번호', '문항 채점', '원래 점수', '맞음 처리 문항', '고침 순번'],
   [T_REC]: ['이름', '점수'],
   [T_REP]: ['시각', '문항 id', '보인 내용', '사유', '처리']
 };
-const NCOL = 11;             // 결과 탭 칸 수
+const NCOL = 12;             // 결과 탭 칸 수
 // 문항 유형 글자별 배점(앱의 EXAM_PLAN 배점과 같아야 한다. tools/mock_gas.js가 확인). S·D만 스스로 맞음 처리 대상
 const PTS = { T: 2, M: 2, C: 2, S: 4, N: 4, D: 4 };
 const SELF_OK = 'SD';
@@ -44,7 +45,7 @@ function ss_() {
   if (id) return SpreadsheetApp.openById(id);
   const active = SpreadsheetApp.getActive();
   if (active) return active;
-  throw new Error('먼저 편집기에서 설정하기를 실행하세요.');
+  throw new Error('먼저 편집기에서 설정하기를 실행하십시오.');
 }
 // 이름 비교는 띄어쓰기를 무시한다(홍 길동 = 홍길동)
 function norm_(s) { return String(s == null ? '' : s).replace(/^'/, '').replace(/\s+/g, ''); }
@@ -64,7 +65,8 @@ function config_(ss) {
   const round = String(v[0][0]).trim();
   const open = String(v[1][0]).trim() === '열림';
   const minutes = Math.max(1, Math.round(Number(v[2][0]) || 30));
-  return { round: round, open: open && !!round, minutes: minutes };
+  // '연습'은 앱이 연습 화면(기록을 보내지 않음)으로 다루므로 실제 시험 회차로 열지 않는다(설정 탭에 직접 적은 경우)
+  return { round: round, open: open && !!round && round !== '연습', minutes: minutes };
 }
 
 /* ---------- 처음 설정 ---------- */
@@ -80,8 +82,9 @@ function 설정하기() {
   if (!st.getRange('B2').getValue()) st.getRange('B2').setValue('닫힘');
   if (!st.getRange('B3').getValue()) st.getRange('B3').setValue(30);
   st.getRange('B2').setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(['열림', '닫힘'], true).build());
-  st.getRange('A5').setValue('회차는 기록표의 회차 이름과 똑같이 적는다(예: 8회차). 시험을 열 때 상태를 열림, 끝나면 닫힘으로 바꾼다. 학생은 제출 직후 점수·정답·해설을 본다.');
+  st.getRange('A5').setValue('회차는 기록표의 회차 이름과 똑같이 적습니다(예: 8회차). 시험을 열 때 상태를 열림, 끝나면 닫힘으로 바꿉니다. 학생은 제출 직후 점수·정답·해설을 봅니다.');
   [T_RES, T_REC, T_REP].forEach(n => tab_(ss, n));
+  noteRound_(config_(ss).round);   // 새 판을 붙여 넣은 뒤 지금 회차를 회차 기록의 시작으로 남긴다
   const s1 = ss.getSheetByName('시트1'); if (s1 && ss.getSheets().length > 1) ss.deleteSheet(s1);
   Logger.log('설정 완료');
 }
@@ -89,7 +92,7 @@ function 설정하기() {
 /* ---------- 앱이 읽는 설정 ---------- */
 function doGet(e) {
   if (e && e.parameter && e.parameter.action === 'config') {
-    try { const c = config_(ss_()); c.ok = true; return out_(c); }
+    try { const c = config_(ss_()); noteRound_(c.round); c.ok = true; return out_(c); }
     catch (err) { return out_({ ok: false, error: String(err) }); }
   }
   return ContentService.createTextOutput('기우제반 플러스 기록 서버가 동작 중입니다.');
@@ -100,15 +103,19 @@ function doPost(e) {
   try {
     const d = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     const lock = LockService.getScriptLock();
-    lock.waitLock(10000);
+    // 시험이 끝나는 순간 한 반이 한꺼번에 제출하므로 넉넉히 기다린다. 못 얻으면 'busy'(앱이 잠시 뒤 다시 보냄)
+    if (!lock.tryLock(30000)) return out_({ ok: false, error: 'busy' });
     try {
       const ss = ss_();
-      if (d.kind === 'exam') return out_(exam_(ss, d));
-      if (d.kind === 'report') return out_(report_(ss, d));
-      if (d.kind === 'suggest') return out_(suggest_(ss, d));
-      if (d.kind === 'fix') return out_(fix_(ss, d));
-      if (d.kind === 'admin') return out_(admin_(ss, d));
-      return out_({ ok: false, error: 'kind' });
+      let r;
+      if (d.kind === 'exam') r = exam_(ss, d);
+      else if (d.kind === 'report') r = report_(ss, d);
+      else if (d.kind === 'suggest') r = suggest_(ss, d);
+      else if (d.kind === 'fix') r = fix_(ss, d);
+      else if (d.kind === 'admin') r = admin_(ss, d);
+      else r = { ok: false, error: 'kind' };
+      SpreadsheetApp.flush();   // 잠금을 풀기 전에 쓴 내용을 반영한다(다음 요청이 바로 읽도록)
+      return out_(r);
     } finally { lock.releaseLock(); }
   } catch (err) {
     return out_({ ok: false, error: String(err) });
@@ -118,24 +125,31 @@ function doPost(e) {
 function exam_(ss, d) {
   const name = String(d.name || '').replace(/\s+/g, ' ').trim().slice(0, 20);
   const marks = d.marks == null ? '' : String(d.marks);
-  if (marks && !marksOk_(marks)) return { ok: false, error: 'bad data' };
+  // 문항 채점은 모두 맞혀도 100점을 넘지 않아야 한다(맞음 처리 뒤에도 100점 이하)
+  if (marks && (!marksOk_(marks) || marksScore_(marks.replace(/x/g, 'o'), []) > 100)) return { ok: false, error: 'bad data' };
   const score = marks ? marksScore_(marks, []) : Number(d.score), leaves = Math.max(0, Math.round(Number(d.leaves) || 0));
   const round = String(d.round || '').trim();
   const cfg = config_(ss);
-  if (!name || !Number.isInteger(score) || score < 0 || score > 100 || !round || round !== cfg.round)
-    return { ok: false, error: 'bad data' };
+  noteRound_(cfg.round);
   const sh = resTab_(ss);
   const n = sh.getLastRow();
   const rows = n >= 2 ? sh.getRange(2, 1, n - 1, 8).getValues() : [];
   // 앱이 만든 제출 번호를 쓴다. 같은 번호가 이미 있으면 다시 보낸 것이므로 줄을 늘리지 않는다.
+  // 회차 검사보다 먼저 본다: 기록은 됐는데 응답을 못 받은 사이 교사가 다음 회차를 열어도 다시 보내기가 성공한다.
   const sid = /^[a-z0-9]{6,24}$/.test(String(d.sid || '')) ? String(d.sid) : newSid_();
   const dup = rows.find(r => String(r[7]) === sid);
   if (dup) return { ok: true, status: String(dup[4]), sid: sid };
+  // 지금 회차가 아니어도, 예전에 열었던 회차(교사 화면에서 다음 회차를 열기 전 회차, 결과 탭에 이미 있는 회차)면 받는다.
+  // 시험 도중 교사가 다음 회차를 열었을 때 그 전에 시작한 학생의 제출이 사라지지 않게 한다('마감 후'로 남김).
+  const current = round === cfg.round;
+  const known = current || pastRounds_().indexOf(round) >= 0 || rows.some(r => String(r[0]).replace(/^'/, '') === round);
+  if (!name || !Number.isInteger(score) || score < 0 || score > 100 || !round || !known)
+    return { ok: false, error: 'bad data' };
   const again = rows.some(r => String(r[0]) === round && norm_(r[1]) === norm_(name));
   const st = [again ? '재응시' : '첫 응시'];
-  if (!cfg.open) st.push('마감 후');
+  if (!cfg.open || !current) st.push('마감 후');
   const when = d.submitted ? new Date(d.submitted) : new Date();
-  sh.appendRow([safe_(round), safe_(name), score, leaves, st.join(', '), isNaN(when) ? new Date() : when, safe_(String(d.browser || '').slice(0, 60)), sid, marks, '', '']);
+  sh.appendRow([safe_(round), safe_(name), score, leaves, st.join(', '), isNaN(when) ? new Date() : when, safe_(String(d.browser || '').slice(0, 60)), sid, marks, '', '', '']);
   return { ok: true, status: st.join(', '), sid: sid };
 }
 // 결과 탭(예전 판이면 새 칸 제목을 채운다)
@@ -144,6 +158,22 @@ function resTab_(ss) {
   const h = sh.getRange(1, 1, 1, NCOL).getValues()[0];
   HEAD[T_RES].forEach((t, i) => { if (!h[i]) sh.getRange(1, i + 1).setValue(t).setFontWeight('bold'); });
   return sh;
+}
+// 교사 화면에서 다른 회차를 열 때 이전 회차를 최근 10개까지 스크립트 속성에 남긴다
+function pastRounds_() {
+  try { return JSON.parse(PropertiesService.getScriptProperties().getProperty('PAST_ROUNDS') || '[]'); } catch (e) { return []; }
+}
+function addPastRound_(r) {
+  if (!r || r === '연습') return;
+  const list = pastRounds_().filter(x => x !== r); list.push(r);
+  PropertiesService.getScriptProperties().setProperty('PAST_ROUNDS', JSON.stringify(list.slice(-10)));
+}
+// 설정 탭 B1을 시트에서 직접 바꾼 경우에도 이전 회차를 남긴다(학생이 시험 정보를 읽을 때 확인)
+function noteRound_(r) {
+  const props = PropertiesService.getScriptProperties(), prev = props.getProperty('CUR_ROUND') || '';
+  if (r === prev) return;
+  if (prev) addPastRound_(prev);
+  props.setProperty('CUR_ROUND', r);
 }
 function marksOk_(m) { return m.length <= 200 && /^([TMCSND][ox])+$/.test(m); }
 // 문항 채점 + 맞음 처리한 문항 번호(1부터)로 점수를 계산한다
@@ -174,8 +204,14 @@ function fix_(ss, d) {
   }
   nums.sort((a, b) => a - b);
   const orig = marksScore_(m, []), score = marksScore_(m, nums);
+  if (score > 100) return { ok: false, error: 'num' };
+  // 순번(seq, 학생이 누른 시각): 늦게 도착한 예전 요청이 더 새 상태를 덮어쓰지 않게 한다(다른 탭·새로고침 전 요청)
+  // 마지막 순번은 결과 탭 '고침 순번' 칸에 남긴다(캐시는 사라질 수 있어 쓰지 않는다)
+  const seq = Number(d.seq) || 0, last = Number(rows[k][11]) || 0;
+  if (seq && last && seq < last) return { ok: true, sid: sid, stale: true, score: Number(rows[k][2]) };
   sh.getRange(k + 2, 3).setValue(score);
   sh.getRange(k + 2, 10, 1, 2).setValues([nums.length ? [orig, nums.join(', ')] : ['', '']]);
+  if (seq) sh.getRange(k + 2, 12).setValue(seq);
   return { ok: true, sid: sid, score: score, orig: orig, nums: nums };
 }
 // 제출 번호: 영문 소문자·숫자 12자(시각 + 무작위)
@@ -215,12 +251,16 @@ function admin_(ss, d) {
   if (!pw) return { ok: false, error: 'nopw' };
   if (fails >= PW_FAIL_LIMIT) return { ok: false, error: 'locked' };
   if (String(d.pw || '') !== pw) { cache.put('pwfail', String(fails + 1), 600); return { ok: false, error: 'pw' }; }
+  if (fails) cache.remove('pwfail');   // 맞게 들어오면 틀린 횟수를 지운다
   const st = tab_(ss, T_SET);
   const a = String(d.action || 'status');
   if (a === 'open') {
     const r = String(d.round || '').replace(/\s+/g, ' ').trim().slice(0, 20);
     const m = Math.max(1, Math.min(180, Math.round(Number(d.minutes) || 30)));
     if (!r) return { ok: false, error: 'round' };
+    if (r === '연습') return { ok: false, error: 'demo' };   // 앱이 '연습'을 연습 화면(기록 안 보냄)으로 다룬다
+    const before = config_(ss).round;
+    if (before && before !== r) addPastRound_(before);
     st.getRange('B1:B3').setValues([[safe_(r)], ['열림'], [m]]);
   } else if (a === 'close') {
     st.getRange('B2').setValue('닫힘');
@@ -253,17 +293,17 @@ function 기록표용_만들기(round) {
   const rows = n >= 2 ? sh.getRange(2, 1, n - 1, 5).getValues() : [];
   const seen = {}, out = [];
   rows.forEach(r => {
-    if (String(r[0]) !== round) return;
+    if (String(r[0]) !== round || !/첫 응시/.test(String(r[4]))) return;   // 결과 탭을 정렬해도 재응시 점수가 들어가지 않게
     const key = norm_(r[1]);
     if (seen[key]) return;                       // 첫 응시 점수만 인정
     seen[key] = true;
-    out.push([r[1], r[2]]);
+    out.push([safe_(r[1]), r[2]]);               // 결과 탭에서 읽은 이름을 다시 쓸 때도 수식으로 읽히지 않게
   });
   const rec = tab_(ss, T_REC);
   rec.clearContents();
   rec.getRange(1, 1, 1, 2).setValues([HEAD[T_REC]]).setFontWeight('bold');
   if (out.length) rec.getRange(2, 1, out.length, 2).setValues(out);
-  rec.getRange(1, 4).setValue(round + ' 첫 응시 ' + out.length + '명');
+  rec.getRange(1, 4).setValue(safe_(round + ' 첫 응시 ' + out.length + '명'));
   Logger.log(round + ' 첫 응시 ' + out.length + '명을 기록표용 탭에 썼습니다.');
   return out.length;
 }
