@@ -29,13 +29,13 @@ class Sheet {
 const sheets = {};
 const ss = { getSheetByName: n => sheets[n] || null, insertSheet: n => (sheets[n] = new Sheet(n)), getSheets: () => Object.values(sheets),
   deleteSheet: s => delete sheets[s.name], getId: () => "SHEET1", getUrl: () => "https://example/sheet" };
-const props = {}, cache = {};
+const props = {}, cache = {}; let lockFree = true;
 const ctx = {
-  SpreadsheetApp: { openById: () => ss, getActive: () => ss, create: () => ss,
+  SpreadsheetApp: { openById: () => ss, getActive: () => ss, create: () => ss, flush: () => {},
     newDataValidation: () => ({ requireValueInList() { return this; }, build() { return {}; } }) },
   PropertiesService: { getScriptProperties: () => ({ getProperty: k => props[k] ?? null, setProperty: (k, v) => { props[k] = v; } }) },
-  CacheService: { getScriptCache: () => ({ get: k => cache[k] ?? null, put: (k, v) => { cache[k] = v; } }) },
-  LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+  CacheService: { getScriptCache: () => ({ get: k => cache[k] ?? null, put: (k, v) => { cache[k] = v; }, remove: k => { delete cache[k]; } }) },
+  LockService: { getScriptLock: () => ({ waitLock() {}, tryLock: () => lockFree, releaseLock() {} }) },
   ContentService: { createTextOutput: s => ({ s, setMimeType() { return this; } }), MimeType: { JSON: "json" } },
   Logger: { log: () => {} }, console, Date, JSON, Math, Number, String
 };
@@ -121,6 +121,63 @@ ok(post({ kind: "suggest", id: "", answer: "x" }).error === "bad data", "문항 
   ok(f.ok && row()[col("점수")] === 84 && row()[col("원래 점수")] === "" && row()[col("맞음 처리 문항")] === "", "모두 되돌리면 원래 점수로, 옆 칸 비움");
   ok(post({ kind: "admin", pw: "test-pw-0000", action: "status", round: "10회차" }).rows.find(x => x.name === "고치기").orig === "", "되돌린 뒤 교사 화면 원래 점수 비움");
   ok(post({ kind: "exam", round: "10회차", name: "이상", score: 50, sid: "badmarks01", marks: "Zo=x" }).error === "bad data", "잘못된 채점표 거부");
+}
+// ---------- 작업표 13 검토 반영 ----------
+{
+  const html = fs.readFileSync(path.join(__dirname, "..", "docs", "index.html"), "utf8");
+  const plan = JSON.parse(/const EXAM_PLAN=(\[\[.*?\]\]);/.exec(html)[1]);
+  const code = { "진위형": "T", "연결형": "M", "4지선다": "C", "단답형": "S", "계산형": "N" };
+  const all = plan.flatMap(([t, n]) => Array(n).fill(code[t]));
+  const half = all.map((c, i) => c + (i >= 30 && i < 34 ? "x" : "o")).join("");   // 31~34 단답형 틀림 → 84점
+  // 시험 도중 교사가 다음 회차를 열어도, 그 전 회차로 시작한 제출은 '마감 후'로 받는다
+  post({ kind: "admin", pw: "test-pw-0000", action: "open", round: "11회차", minutes: 40 });
+  const a1 = post({ kind: "exam", round: "11회차", name: "먼저낸", sid: "rnd11aaaa1", marks: half });
+  post({ kind: "admin", pw: "test-pw-0000", action: "open", round: "12회차", minutes: 40 });
+  const a2 = post({ kind: "exam", round: "11회차", name: "늦게낸", sid: "rnd11bbbb1", marks: half });
+  ok(a1.ok && a2.ok && a2.status.includes("마감 후") && subRow("rnd11bbbb1").length === 1, "다음 회차를 연 뒤에도 이전 회차 제출을 '마감 후'로 받음");
+  // 기록은 됐는데 응답을 못 받은 제출을 회차가 바뀐 뒤 다시 보내도 성공(줄은 늘지 않음)
+  const a3 = post({ kind: "exam", round: "11회차", name: "먼저낸", sid: "rnd11aaaa1", marks: half });
+  ok(a3.ok && a3.sid === "rnd11aaaa1" && subRow("rnd11aaaa1").length === 1, "회차가 바뀐 뒤 같은 제출 번호로 다시 보내기 성공");
+  ok(post({ kind: "exam", round: "99회차", name: "가", sid: "rnd99aaaa1", marks: half }).error === "bad data", "열린 적 없는 회차 제출은 거부");
+  // 모두 맞혀도 100점을 넘는 채점표는 거부(맞음 처리로 100점 초과 방지)
+  ok(post({ kind: "exam", round: "12회차", name: "넘침", sid: "over000001", marks: half + "Sx" }).error === "bad data", "100점을 넘을 수 있는 채점표 거부");
+  // 점수 고치기 순번: 늦게 도착한 예전 요청은 새 상태를 덮어쓰지 않는다
+  const rowA = () => subRow("rnd11aaaa1")[0];
+  ok(post({ kind: "fix", sid: "rnd11aaaa1", nums: [31, 32], seq: 2000 }).score === 92, "고치기(순번 2000) 92점");
+  const st = post({ kind: "fix", sid: "rnd11aaaa1", nums: [31, 32, 33, 34], seq: 1000 });
+  ok(st.ok && st.stale && rowA()[col("점수")] === 92 && rowA()[col("맞음 처리 문항")] === "31, 32", "늦게 온 예전 요청(순번 1000)은 무시");
+  ok(post({ kind: "fix", sid: "rnd11aaaa1", nums: [], seq: 3000 }).score === 84 && rowA()[col("원래 점수")] === "", "새 요청(순번 3000) 되돌리기는 반영");
+  Object.keys(cache).forEach(k => { if (k !== "pwfail") delete cache[k]; });   // 캐시가 비어도
+  ok(post({ kind: "fix", sid: "rnd11aaaa1", nums: [31], seq: 2500 }).stale && rowA()[col("점수")] === 84 && rowA()[col("고침 순번")] === 3000, "순번은 결과 탭에 남아 캐시가 비어도 예전 요청 무시");
+  // 설정 탭 B1을 시트에서 직접 바꿔도(교사 화면을 거치지 않아도) 이전 회차 제출을 받는다
+  sheets["설정"].put(1, 2, "14회차"); ctx.doGet({ parameter: { action: "config" } });
+  sheets["설정"].put(1, 2, "15회차"); ctx.doGet({ parameter: { action: "config" } });
+  ok(post({ kind: "exam", round: "14회차", name: "직접", sid: "rnd14aaaa1", marks: half }).ok, "B1 직접 변경 뒤 이전 회차 제출 받음");
+  // 기록표용은 상태가 '첫 응시'인 줄만(결과 탭을 정렬해 재응시가 위로 와도)
+  post({ kind: "exam", round: "15회차", name: "정렬", sid: "sort000001", marks: half });
+  post({ kind: "exam", round: "15회차", name: "정렬", sid: "sort000002", marks: all.map(c => c + "o").join("") });
+  { const d = resTab().d, i1 = d.findIndex(r => r[col("제출 번호")] === "sort000001"), i2 = d.findIndex(r => r[col("제출 번호")] === "sort000002");
+    [d[i1], d[i2]] = [d[i2], d[i1]]; }
+  post({ kind: "admin", pw: "test-pw-0000", action: "record", round: "15회차" });
+  ok(sheets["기록표용"].d.slice(1).some(x => x[0] === "정렬" && x[1] === 84), "기록표용은 정렬과 상관없이 첫 응시 점수(84)");
+  // 동시 제출로 잠금을 못 얻으면 'busy'로 돌려준다(앱이 잠시 뒤 다시 보냄)
+  lockFree = false;
+  ok(post({ kind: "exam", round: "12회차", name: "대기", sid: "busy000001", marks: half }).error === "busy" && subRow("busy000001").length === 0, "잠금 대기 초과는 busy");
+  lockFree = true;
+  // 기록표용 탭에 다시 쓰는 이름도 수식으로 읽히지 않게
+  post({ kind: "admin", pw: "test-pw-0000", action: "open", round: "13회차", minutes: 40 });
+  post({ kind: "exam", round: "13회차", name: "=1+1", sid: "formula001", marks: half });
+  subRow("formula001")[0][col("이름")] = "=1+1";   // 실제 시트는 읽을 때 앞의 ' 를 떼고 돌려준다
+  post({ kind: "admin", pw: "test-pw-0000", action: "record", round: "13회차" });
+  ok(sheets["기록표용"].d[1][0] === "'=1+1", "기록표용 이름 수식 방지");
+  { const save = sheets["설정"].cell(1, 2); sheets["설정"].put(1, 2, "연습");
+    ok(JSON.parse(ctx.doGet({ parameter: { action: "config" } }).s).open === false, "설정 탭에 '연습'을 직접 적어도 열리지 않음");
+    sheets["설정"].put(1, 2, save); ctx.doGet({ parameter: { action: "config" } }); }
+  ok(post({ kind: "admin", pw: "test-pw-0000", action: "open", round: "연습", minutes: 40 }).error === "demo", "'연습'은 회차 이름으로 열 수 없음");
+  // 비밀번호: 맞게 들어오면 틀린 횟수를 지운다
+  for (let i = 0; i < 9; i++) post({ kind: "admin", pw: "1", action: "status" });
+  ok(post({ kind: "admin", pw: "test-pw-0000", action: "status" }).ok, "9번 틀린 뒤 맞으면 들어감");
+  ok(post({ kind: "admin", pw: "1", action: "status" }).error === "pw" && post({ kind: "admin", pw: "test-pw-0000", action: "status" }).ok, "맞게 들어온 뒤에는 한 번 틀려도 잠기지 않음");
 }
 for (let i = 0; i < 10; i++) post({ kind: "admin", pw: "1", action: "status" });
 ok(post({ kind: "admin", pw: "test-pw-0000", action: "status" }).error === "locked", "10번 틀리면 잠금");

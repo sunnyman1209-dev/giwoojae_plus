@@ -169,6 +169,36 @@ for (let k = 0; k < 200; k++) {
   }
   if (tried < 100) bad("맞음 표시 시험 표본 부족", tried);
 }
+// ---------- 결과 다시 보기는 제출 때 시트에 보낸 채점(marks)을 따른다(작업표 13) ----------
+// 맞음 표시한 답을 다음 배포에서 인정 답안에 넣거나 문항이 없어져도, 화면 점수·맞음 표시가 시트와 어긋나지 않아야 한다
+{
+  let done = 0;
+  for (let k = 0; k < 60 && done < 20; k++) {
+    const items = E.buildExam(DB.questions), a = {};
+    items.forEach((it, i) => { const q = BY[it.id], v = E.view(q, it);
+      a[i] = q.t === "단답형" ? "새로 인정될 답" : q.t === "진위형" ? q.ans : q.t === "4지선다" ? v.ansPos : q.t === "연결형" ? q.ans.slice() : v.ansText; });
+    const rec = { items, a }; rec.marks = E.examMarks(BY, rec);
+    const i = items.findIndex(it => BY[it.id].t === "단답형"); if (i < 0) continue;
+    rec.self = [i];
+    const before = E.examResult(BY, rec);
+    if (before.score !== 100 - 4 * 8 + 4) bad("맞음 표시 하나 반영 점수", before.score);
+    const q = BY[items[i].id], BY2 = Object.assign({}, BY, { [q.id]: Object.assign({}, q, { accept: (q.accept || []).concat(["새로 인정될 답"]) }) });
+    const after = E.examResult(BY2, rec);
+    if (after.score !== before.score || !after.rows[i].self || !after.rows[i].selfable || after.rows[i].graded) bad("인정 답안이 바뀐 뒤 다시 연 결과가 제출 때와 다름", q.id);
+    if (!E.examResult(BY2, Object.assign({}, rec, { marks: null })).rows[i].graded) bad("marks 없이는 지금 데이터로 다시 채점");
+    if (E.examMarks(BY2, rec) === rec.marks) bad("examMarks 는 저장된 채점이 아니라 지금 데이터로 채점해야 함");
+    const old = E.examResult(BY2, { items, a, self: [i], payload: { marks: rec.marks } });
+    if (old.score !== before.score) bad("예전 기록(payload.marks)도 제출 때 채점을 따름");
+    const BY3 = Object.assign({}, BY); delete BY3[items[0].id];
+    if (E.examResult(BY3, rec).score !== before.score) bad("없어진 문항도 제출 때 점수 유지");
+    const BY4 = Object.assign({}, BY); delete BY4[items[i].id];   // 맞음 표시한 단답형 문항이 없어져도
+    const r4 = E.examResult(BY4, rec);
+    if (r4.score !== before.score || !r4.rows[i].self || !r4.rows[i].selfable) bad("없어진 단답형의 맞음 표시·되돌리기 유지", r4.score);
+    done++;
+  }
+  if (done < 10) bad("marks 시험 표본 부족", done);
+}
+if (!E.calcOk("−10", -10, 0)) bad("유니코드 마이너스(−) 입력 인정");
 if (E.examResult(BY, { items: [{ id: "없는 문항" }], a: { 0: "x" } }).score !== 0) bad("사라진 문항은 0점");
 if (E.examResult(BY, { items: [{ id: "g1|6", o: [0, 1, 2, 3] }], a: {} }).rows[0].mine !== null) bad("비운 답은 null");
 
