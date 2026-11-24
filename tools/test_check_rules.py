@@ -39,6 +39,11 @@ def run():
     expect("교재 근거에 NCS 자료집 없음", R.textbook_errors(tb(ex={"근거": "개인 오차는 사람에 따라 생긴다."})), True)
     expect("교재 근거 설명 + NCS 자료집", R.textbook_errors(tb(ex={"근거": "개인 오차는 사람에 따라 생긴다.\n\n출처: NCS 자료집"})), False)
     expect("교재 id에 회차-번호 없음", R.textbook_errors(tb(id="tb|new7")), True)
+    # 1-2. (작업표 05) 교재 이론 공백 문항: 같은 규칙, id는 th|쪽-번호
+    expect("정상 교재이론 4지", R.textbook_errors(tb(id="th|6-3", origin="교재이론")), False)
+    expect("교재이론 근거에 NCS 자료집 없음", R.textbook_errors(tb(id="th|6-3", origin="교재이론", ex={"근거": "개인 오차는 사람에 따라 생긴다."})), True)
+    expect("교재이론 id에 쪽-번호 없음", R.textbook_errors(tb(id="tb|6-3", origin="교재이론")), True)
+    expect("교재이론 단답 인정 답안 없음", R.textbook_errors(dict(short, id="th|4-1", origin="교재이론", accept=[])), True)
     expect("교재 연결 정답 있음", R.textbook_errors(tb(t="연결형", choices=None, ans=[1, 0], left=["a", "b"], right=["c", "d"])), False)
 
     # 2. 화면에 보이는 글의 출처 노출
