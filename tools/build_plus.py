@@ -18,6 +18,12 @@ if not os.path.isdir(os.path.join(H, "quiz")):  # 작업틀(worktree)에서 돌�
     import subprocess
     _c = subprocess.run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=P, capture_output=True, text=True).stdout.strip()
     H = os.path.dirname(os.path.dirname(_c))
+# 저장소 밖(git 제외) work 폴더: 작업틀에 없으면 원래 저장소의 work를 쓴다
+W = os.path.join(P, "work")
+if not os.path.isdir(W):
+    import subprocess
+    _g = subprocess.run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=P, capture_output=True, text=True).stdout.strip()
+    W = os.path.join(os.path.dirname(_g), "work")
 CIRC = "①②③④⑤⑥"
 
 
@@ -112,7 +118,7 @@ def main():
         new += json.load(open(f, encoding="utf-8"))
     approved = set(lines(os.path.join(P, "src", "approved.txt")))
     if approved:
-        for f in glob.glob(os.path.join(P, "work", "*", "보류.json")):
+        for f in glob.glob(os.path.join(W, "*", "보류.json")):
             new += [n for n in json.load(open(f, encoding="utf-8")) if n["id"] in approved]
     for n in new:
         n = {k: v for k, v in n.items() if k not in ("verify", "calcExpr", "basis")}
