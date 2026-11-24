@@ -135,6 +135,10 @@ def main():
     ov = json.load(open(ovp, encoding="utf-8")) if os.path.exists(ovp) else {}
     ov.pop("_설명", None)
     errs += R.apply_ex_override(byid, ov)
+    avp = os.path.join(P, "src", "ans_override.json")
+    av = json.load(open(avp, encoding="utf-8")) if os.path.exists(avp) else {}
+    av.pop("_설명", None)
+    errs += R.apply_ans_override(byid, av)
     for cid, c in calc.items():
         if cid not in byid:
             errs.append(f"calc.json: 없는 문항 {cid}")

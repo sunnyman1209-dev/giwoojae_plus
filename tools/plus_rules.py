@@ -106,3 +106,29 @@ def apply_ex_override(by_id, ov):
         else:
             q["ex"] = ex
     return errs
+
+
+def apply_ans_override(by_id, av):
+    """기존 문항의 정답 글(ansText)을 고친다. 4지선다는 고친 글이 정답 보기와 같아야 한다."""
+    errs = []
+    for qid, txt in av.items():
+        q = by_id.get(qid)
+        if q is None:
+            errs.append(f"정답 글 덮어쓰기: 없는 문항 {qid}")
+            continue
+        if q.get("src") != "old":
+            errs.append(f"정답 글 덮어쓰기: {qid}는 기존 문항이 아님(새 문항은 src/new에서 고친다)")
+            continue
+        if not isinstance(txt, str) or not txt.strip():
+            errs.append(f"정답 글 덮어쓰기: {qid} 글이 비었음")
+            continue
+        if txt == q.get("ansText"):
+            errs.append(f"정답 글 덮어쓰기: {qid} 원본과 같아 바뀐 것 없음")
+            continue
+        if q.get("t") == "4지선다" and isinstance(q.get("ans"), int):
+            want = "①②③④⑤"[q["ans"]] + " " + q["choices"][q["ans"]]
+            if txt != want:
+                errs.append(f"정답 글 덮어쓰기: {qid} 정답 보기와 다름(기대: {want})")
+                continue
+        q["ansText"] = txt
+    return errs

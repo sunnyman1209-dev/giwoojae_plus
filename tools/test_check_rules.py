@@ -75,6 +75,17 @@ def run():
     expect("덮어쓰기 모르는 칸", R.apply_ex_override(by, {"g1|6": {"근가": "x"}}), True)
     expect("덮어쓰기 근거 비움 금지", R.apply_ex_override(by, {"g1|6": {"근거": " "}}), True)
     expect("덮어쓰기 바뀐 것 없음", R.apply_ex_override(by, {"g1|6": {"근거": "옛 근거"}}), True)
+    # 4-1. 기존 문항 정답 글 덮어쓰기(src/ans_override.json)
+    old["ansText"] = "④ 디"
+    expect("정답 글 4지 정상", R.apply_ans_override(by, {"g1|6": "④ d"}), False)
+    if old["ansText"] != "④ d":
+        fails.append(f"정답 글 덮어쓰기 결과가 다름: {old['ansText']}")
+    expect("정답 글 4지는 정답 보기와 같아야", R.apply_ans_override(by, {"g1|6": "③ c"}), True)
+    expect("정답 글 바뀐 것 없음", R.apply_ans_override(by, {"g1|6": "④ d"}), True)
+    expect("정답 글 없는 문항", R.apply_ans_override(by, {"g9|99": "x"}), True)
+    expect("정답 글은 기존 문항만", R.apply_ans_override(by, {"tb|3-12": "x"}), True)
+    calc = {"id": "a|11", "src": "old", "t": "계산형", "value": 531, "unit": "rpm", "ansText": "③ 531"}
+    expect("정답 글 계산형 정상", R.apply_ans_override({"a|11": calc}, {"a|11": "531 rpm"}), False)
 
     # 5. 출처 노출: 기존 문항도 실패로 본다(06에서 덮어쓰기로 고친 뒤 올림)
     expect("기존 문항 해설에 교재", R.leaks({"src": "old", "ex": {"근거": "교재 199쪽 참고"}}), True)
