@@ -44,8 +44,13 @@ def textbook_errors(q):
         has = bool(str(q.get("ansText") or "").strip())
     if not has:
         out.append("정답 없음")
-    if not str((q.get("ex") or {}).get("근거") or "").strip():
+    basis = str((q.get("ex") or {}).get("근거") or "").strip()
+    if not basis:
         out.append("해설 근거 없음")
+    elif "NCS 자료집" not in basis:
+        out.append("근거 출처 'NCS 자료집' 없음")
+    if q.get("origin") == "교재" and not re.match(r"^tb\|\d+-\d+$", str(q.get("id"))):
+        out.append("id에 교재 회차-번호 없음(tb|회차-번호)")
     if t == "단답형" and not [a for a in (q.get("accept") or []) if str(a).strip()]:
         out.append("인정 답안 없음")
     return out

@@ -35,6 +35,11 @@ def run():
     expect("교재 계산 단위 없음", R.textbook_errors(tb(t="계산형", choices=None, ans=None, value=0.02, unit="")), True)
     expect("교재 연결 정답 없음", R.textbook_errors(tb(t="연결형", choices=None, ans=None, left=["a"], right=["b"])), True)
     expect("교재 아닌 문항은 이 규칙 밖", R.textbook_errors(tb(origin=None, ans=None)), False)
+    # 1-1. (작업표 02) 근거 칸의 출처는 'NCS 자료집', 교재 문항 id로 교재 회차-번호를 알 수 있다
+    expect("교재 근거에 NCS 자료집 없음", R.textbook_errors(tb(ex={"근거": "개인 오차는 사람에 따라 생긴다."})), True)
+    expect("교재 근거 설명 + NCS 자료집", R.textbook_errors(tb(ex={"근거": "개인 오차는 사람에 따라 생긴다.\n\n출처: NCS 자료집"})), False)
+    expect("교재 id에 회차-번호 없음", R.textbook_errors(tb(id="tb|new7")), True)
+    expect("교재 연결 정답 있음", R.textbook_errors(tb(t="연결형", choices=None, ans=[1, 0], left=["a", "b"], right=["c", "d"])), False)
 
     # 2. 화면에 보이는 글의 출처 노출
     expect("정상 문항 출처 없음", R.leaks(tb()), False)
