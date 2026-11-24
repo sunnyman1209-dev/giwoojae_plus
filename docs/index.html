@@ -169,6 +169,9 @@ main{max-width:640px;margin:0 auto;padding:12px 16px calc(120px + env(safe-area-
 .qnav button{border:1.5px solid var(--line);background:var(--card);border-radius:10px;padding:10px 0;font-size:15px;font-weight:600;cursor:pointer}
 .qnav button.has{background:var(--chip);border-color:var(--chip)}
 .qnav button.now{border-color:var(--pri)}
+.qnav button.flag{border-color:var(--mid);color:var(--mid);box-shadow:inset 0 -5px 0 var(--mid)}
+.meta .flagBtn{margin-left:auto;border:1.5px solid var(--line);background:var(--card);color:var(--sub);border-radius:6px;padding:2px 10px;font-size:13px;font-weight:600;cursor:pointer}
+.meta .flagBtn.on{background:var(--mid-bg);border-color:var(--mid);color:var(--mid)}
 .qnav button.ok{background:var(--ok-bg);border-color:var(--ok-bg);color:var(--ok)}
 .qnav button.no{background:var(--no-bg);border-color:var(--no-bg);color:var(--no)}
 .notice{background:var(--box);border-radius:12px;padding:12px 14px;font-size:15px;margin:14px 0 0}
@@ -488,7 +491,7 @@ function lshow(){
       setAct([{t:"제출",d:Q.left.some((_,k)=>lv.match[k]==null),f:gradeMatch}])}));
     setAct([{t:"제출",d:true,f:gradeMatch}]);
   }else if(Q.t==="계산형"&&V.value!=null){
-    ui.innerHTML=`<div class="inp"><input id="in" inputmode="decimal" autocomplete="off" placeholder="답(숫자)">${Q.unit?`<span class="unit">${esc(Q.unit)}</span>`:""}</div>`;
+    ui.innerHTML=`<div class="inp"><input id="in" autocomplete="off" autocapitalize="off" placeholder="답(숫자, 단위는 써도 됨)">${Q.unit?`<span class="unit">${esc(Q.unit)}</span>`:""}</div>`;
     inputAct(v=>{if(lv.answered)return;lv.answered=true;$("in").disabled=true;const ok=calcOk(v,V.value,V.round);finish(ok?"o":"x",{mine:v+(Q.unit?" "+Q.unit:"")})});
   }else if(Q.t==="단답형"&&Q.accept){
     ui.innerHTML=`<div class="inp"><input id="in" autocomplete="off" autocapitalize="off" placeholder="답 입력"></div>`;
@@ -742,8 +745,10 @@ function renderQ(){
     $("main").innerHTML=`<div class="card"><div class="meta"><span>${ei+1}번</span></div><p>이 문항은 문제은행에서 바뀌어 표시할 수 없습니다. 다음 문항으로 넘어가십시오.</p></div>`;
     window.scrollTo(0,0);setAct(acts);return}
   const v=view(q,it);
-  $("main").innerHTML=`<div class="card"><div class="meta"><span>${ei+1}번</span><span>${esc(q.t)}</span><span>${pointsOf(q.t)}점</span></div><div class="stem">${md(v.stem)}</div>${figHtml(q)}<div id="ui"></div></div>`;
+  const fl=isFlag(ei);
+  $("main").innerHTML=`<div class="card"><div class="meta"><span>${ei+1}번</span><span>${esc(q.t)}</span><span>${pointsOf(q.t)}점</span><button class="flagBtn${fl?" on":""}" id="flagBtn" aria-pressed="${fl}">${fl?"다시 볼 문항":"다시 보기 표시"}</button></div><div class="stem">${md(v.stem)}</div>${figHtml(q)}<div id="ui"></div></div>`;
   window.scrollTo(0,0);const ui=$("ui");
+  $("flagBtn").onclick=()=>{if(E.done)return;toggleFlag(ei);const on=isFlag(ei),b=$("flagBtn");b.classList.toggle("on",on);b.setAttribute("aria-pressed",on);b.textContent=on?"다시 볼 문항":"다시 보기 표시"};
   const save=x=>{if(E.done)return;E.a[ei]=x;E.at=ei;esave()};
   if(q.t==="진위형"){
     ui.innerHTML=`<div class="ox">${["O","X"].map(x=>`<button class="btn${a===x?" sel":""}" data-v="${x}">${x}</button>`).join("")}</div>`;
@@ -758,20 +763,26 @@ function renderQ(){
         b.onclick=()=>{cur[r]=+b.dataset.j;save(cur.slice());row.querySelectorAll("button").forEach(x=>x.classList.toggle("sel",x===b))}})});
   }else{
     const calc=q.t==="계산형";
-    ui.innerHTML=`<div class="inp"><input id="in" ${calc?'inputmode="decimal"':""} autocomplete="off" autocapitalize="off" placeholder="${calc?"답(숫자)":"답 입력"}" value="${esc(a||"")}">${calc&&q.unit?`<span class="unit">${esc(q.unit)}</span>`:""}</div>`;
+    // 계산형도 일반 자판: 숫자 전용 자판은 '-' 부호나 단위를 쓸 수 없다(채점은 앞의 숫자만 읽는다)
+    ui.innerHTML=`<div class="inp"><input id="in" autocomplete="off" autocapitalize="off" placeholder="${calc?"답(숫자, 단위는 써도 됨)":"답 입력"}" value="${esc(a||"")}">${calc&&q.unit?`<span class="unit">${esc(q.unit)}</span>`:""}</div>`;
     $("in").oninput=e=>save(e.target.value.trim());
     $("in").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();$("in").blur()}};
   }
   setAct(acts)}
+/* 다시 볼 문항 표시(학생 의견): 시험 중 헷갈린 문항을 표시해 두고 문항 목록에서 찾아간다. 채점과는 관계없다 */
+function isFlag(i){return !!(E&&Array.isArray(E.flag)&&E.flag.includes(i))}
+function toggleFlag(i){if(!E||E.done)return;const f=Array.isArray(E.flag)?E.flag.slice():[];const k=f.indexOf(i);if(k<0)f.push(i);else f.splice(k,1);E.flag=f.sort((x,y)=>x-y);esave()}
 function openNav(){
-  let h=sheetTop("문항 목록")+`<p>색칠된 번호는 답을 적은 문항입니다.</p><div class="qnav">${E.items.map((_,i)=>`<button class="${answered(i)?"has":""}${i===ei?" now":""}" data-i="${i}">${i+1}</button>`).join("")}</div>`;
+  const nf=Array.isArray(E.flag)?E.flag.length:0;
+  let h=sheetTop("문항 목록")+`<p>색칠된 번호는 답을 적은 문항입니다. 노란 테두리 번호는 '다시 보기 표시'를 한 문항입니다${nf?`(${nf}개)`:""}.</p><div class="qnav">${E.items.map((_,i)=>`<button class="${answered(i)?"has":""}${i===ei?" now":""}${isFlag(i)?" flag":""}" data-i="${i}" aria-label="${i+1}번${isFlag(i)?", 다시 볼 문항":""}">${i+1}</button>`).join("")}</div>`;
   h+=`<div class="act"><button id="navSubmit">제출</button></div>`;
   openSheet(h,"문항 목록");
   $("sheet").querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{ei=+b.dataset.i;E.at=ei;esave();closeSheet();renderQ()});
   $("navSubmit").onclick=()=>{closeSheet();askSubmit()}}
 function askSubmit(){
-  const blank=E.items.filter((_,i)=>!answered(i)).length;
-  if(!confirm(blank?`답을 적지 않은 문항이 ${blank}개 있습니다. 제출하시겠습니까?`:"제출하시겠습니까? 제출하면 고칠 수 없습니다."))return;
+  const blank=E.items.filter((_,i)=>!answered(i)).length,nf=Array.isArray(E.flag)?E.flag.length:0;
+  const fl=nf?` 다시 보기 표시한 문항이 ${nf}개 있습니다(${E.flag.map(i=>i+1).join(", ")}번).`:"";
+  if(!confirm((blank?`답을 적지 않은 문항이 ${blank}개 있습니다.`:"")+fl+(blank||nf?" 제출하시겠습니까?":"제출하시겠습니까? 제출하면 고칠 수 없습니다.")))return;
   submit(false)}
 function submit(auto){
   if(!E||E.done)return;clearInterval(timer);closeSheet();   // 문항 목록을 연 채 시간이 끝나도 목록이 남지 않게
