@@ -1,11 +1,12 @@
 r"""데이터 검사 규칙 (SPEC_1124 Testing Decisions 1). check_plus.py가 쓰고, test_check_rules.py가 가짜 문항으로 시험한다.
 
 내부 표시: 교재 예상문제·실전 모의고사에서 넣은 문항은 원본 데이터에 "origin": "교재" 또는 "실전모의"를 둔다.
+교재 이론(책 1~20쪽) 공백 주제로 새로 만든 문항(작업표 05)은 "origin": "교재이론", id 'th|<책 쪽>-<번호>'.
 이 값과 교재 회차-번호가 담긴 id는 화면에 나오지 않는다.
 """
 import re
 
-ORIGINS = ("교재", "실전모의")
+ORIGINS = ("교재", "실전모의", "교재이론")
 
 # 학생 화면에 보이는 필드: 지문, 보기, 연결형 양쪽, 정답 글, 인정 답안, 해설 전체
 VISIBLE = ("stem", "choices", "left", "right", "ansText", "accept", "ex", "exChoice")
@@ -51,6 +52,8 @@ def textbook_errors(q):
         out.append("근거 출처 'NCS 자료집' 없음")
     if q.get("origin") == "교재" and not re.match(r"^tb\|\d+-\d+$", str(q.get("id"))):
         out.append("id에 교재 회차-번호 없음(tb|회차-번호)")
+    if q.get("origin") == "교재이론" and not re.match(r"^th\|\d+-\d+$", str(q.get("id"))):
+        out.append("id에 교재 이론 쪽-번호 없음(th|쪽-번호)")
     if t == "단답형" and not [a for a in (q.get("accept") or []) if str(a).strip()]:
         out.append("인정 답안 없음")
     return out
