@@ -139,6 +139,13 @@ def main():
     av = json.load(open(avp, encoding="utf-8")) if os.path.exists(avp) else {}
     av.pop("_설명", None)
     errs += R.apply_ans_override(byid, av)
+    # 기존 진위형의 정답 글 '① O'·'② X'는 원래 앱 단추 번호다. 플러스는 O·X 단추뿐이라 'O'·'X'로 맞춘다.
+    for q in qs:
+        if q.get("t") == "진위형" and q.get("ans") in ("O", "X"):
+            if re.fullmatch(r"[①②]\s*[OX]", str(q.get("ansText") or "")):
+                q["ansText"] = q["ans"]
+            elif q.get("ansText") != q["ans"]:
+                errs.append(f"진위형 정답 글이 정답과 다름: {q['id']} {q.get('ansText')!r}")
     for cid, c in calc.items():
         if cid not in byid:
             errs.append(f"calc.json: 없는 문항 {cid}")
