@@ -37,6 +37,18 @@ if len(QS) != len(old) + len(new_src) + len(approved):
 if len(BY) != len(QS):
     err("id 중복")
 
+# 1-1. 기존 문항 해설 덮어쓰기(src/ex_override.json)가 빌드에 들어갔다
+import copy  # noqa: E402
+ovp = os.path.join(P, "src", "ex_override.json")
+ov = json.load(open(ovp, encoding="utf-8")) if os.path.exists(ovp) else {}
+ov.pop("_설명", None)
+want = {q["id"]: dict(copy.deepcopy(q), src="old") for q in old if q["id"] in ov}
+for e in R.apply_ex_override(dict(want, **{k: {"src": "new"} for k in ov if k in BY and k not in want}), ov):
+    err(e)
+for qid, w in want.items():
+    if qid in BY and BY[qid].get("ex") != w.get("ex"):
+        err(f"{qid} 해설 덮어쓰기가 빌드에 반영되지 않음(build_plus.py를 다시 돌린다)")
+
 # 2. 꼬리표
 for q in QS:
     if not (q.get("tag") or {}).get("box") or not (q.get("tag") or {}).get("item"):
@@ -101,24 +113,21 @@ if any(q.get("cbt") and q["t"] == "서술형" for q in QS):
 
 # 7. 2차 명세(SPEC_1124) 규칙
 #  - 교재·실전모의 문항: 정답, 근거, 단답형 인정 답안
-#  - 화면 글의 출처 노출: 새 문항은 실패, 기존 590문항(해설집 원본)은 경고(06에서 덮어쓰기로 고침)
+#  - 화면 글의 출처 노출: 모든 문항 실패(기존 590문항은 src/ex_override.json으로 고침, 작업표 06)
 #  - 해설의 원본 지칭: 경고. --notes <경로>를 주면 경고 목록을 md로 남긴다.
 for q in QS:
     for e in R.textbook_errors(q):
         err(f"{q['id']} 교재 문항 {e}")
-leak_warn, ref_warn = [], []
+ref_warn = []
 for q in QS:
     lk = R.leaks(q)
     if lk:
         msg = ", ".join(sorted({f"{f}:'{m}'" for f, m in lk}))
-        if q["src"] == "old":
-            leak_warn.append((q["id"], msg))
-        else:
-            err(f"{q['id']} 화면 글에 출처 노출 {msg}")
+        err(f"{q['id']} 화면 글에 출처 노출 {msg}")  # 기존 590문항도 06에서 덮어쓰기로 고친 뒤 실패로 올림
     rf = R.refs(q)
     if rf:
         ref_warn.append((q["id"], ", ".join(sorted(set(rf)))))
-print(f"경고: 해설 원본 지칭 {len(ref_warn)}문항, 기존 문항 출처 노출 {len(leak_warn)}문항")
+print(f"경고: 해설 원본 지칭 {len(ref_warn)}문항")
 if "--notes" in sys.argv:
     out = sys.argv[sys.argv.index("--notes") + 1]
     L = ["# 01 데이터 검사 경고 목록", "", f"- 만든 도구: tools/check_plus.py --notes (문항 {len(QS)})",
@@ -127,9 +136,6 @@ if "--notes" in sys.argv:
          "| id | 찾은 말 |", "|---|---|"]
     cell = lambda i: i.replace("|", r"\|")  # id의 세로선이 표를 깨지 않게
     L += [f"| {cell(i)} | {m} |" for i, m in ref_warn]
-    L += ["", f"## 기존 문항 화면 글의 출처 노출 ({len(leak_warn)}문항)", "",
-          "새 문항이면 실패, 기존 590문항은 해설집 원본 글이라 경고로만 둔다.", "", "| id | 필드:찾은 말 |", "|---|---|"]
-    L += [f"| {cell(i)} | {m} |" for i, m in leak_warn]
     open(out, "w", encoding="utf-8").write("\n".join(L) + "\n")
     print(f"경고 목록 저장: {out}")
 

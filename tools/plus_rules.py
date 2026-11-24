@@ -69,3 +69,40 @@ def leaks(q):
 def refs(q):
     """해설에 남은 원본 지칭: [찾은 글, ...]"""
     return [m.group() for s in texts(q.get("ex")) for m in REF.finditer(s)]
+
+
+# 기존 590문항 해설 덮어쓰기(SPEC_1124 C, 작업표 06): src/ex_override.json = {문항 id: {해설 칸: 새 값 | null}}
+# 원래 앱(quiz)의 데이터는 그대로 두고 플러스 쪽에서만 고친다. null이면 그 칸을 지운다.
+EX_KEYS = ("근거", "오답", "개념", "정의", "비슷한말", "보충", "짝", "계산", "모범답안", "고친문장")
+
+
+def apply_ex_override(by_id, ov):
+    """by_id의 기존 문항 해설에 덮어쓰기를 적용하고 잘못된 항목을 [글, ...]로 돌려준다."""
+    errs = []
+    for qid, patch in ov.items():
+        q = by_id.get(qid)
+        if q is None:
+            errs.append(f"해설 덮어쓰기: 없는 문항 {qid}")
+            continue
+        if q.get("src") != "old":
+            errs.append(f"해설 덮어쓰기: {qid}는 기존 문항이 아님(새 문항은 src/new에서 고친다)")
+            continue
+        ex = dict(q.get("ex") or {})
+        changed = False
+        for k, v in patch.items():
+            if k not in EX_KEYS:
+                errs.append(f"해설 덮어쓰기: {qid} 모르는 칸 '{k}'")
+                continue
+            if v is None:
+                changed |= k in ex
+                ex.pop(k, None)
+            else:
+                changed |= ex.get(k) != v
+                ex[k] = v
+        if not str(ex.get("근거") or "").strip():
+            errs.append(f"해설 덮어쓰기: {qid} 근거가 비었음")
+        elif not changed:
+            errs.append(f"해설 덮어쓰기: {qid} 원본과 같아 바뀐 것 없음")
+        else:
+            q["ex"] = ex
+    return errs
