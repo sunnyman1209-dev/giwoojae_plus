@@ -7,7 +7,7 @@ const html = fs.readFileSync(path.join(P, "docs", "index.html"), "utf8");
 const code = html.split("/* ===== ENGINE-START")[1].split("/* ===== ENGINE-END")[0].replace(/^[^\n]*\n/, "");
 const ctx = { CIRC: "①②③④⑤⑥", console, Math };
 vm.createContext(ctx);
-vm.runInContext(code + "\nthis.E={norm,FORMULAS,fillT,pickVals,makeInst,view,calcOk,shortOk,buildExam,scoreExam,examResult,tagKey,EXAM_PLAN,pointsOf,selfMarkable,selfMark};", ctx);
+vm.runInContext(code + "\nthis.E={norm,FORMULAS,fillT,pickVals,makeInst,view,calcOk,shortOk,buildExam,scoreExam,examResult,tagKey,EXAM_PLAN,pointsOf,selfMarkable,selfMark,examMarks};", ctx);
 const E = ctx.E;
 const DB = JSON.parse(fs.readFileSync(path.join(P, "docs", "data", "questions.json"), "utf8"));
 const BY = {}; DB.questions.forEach(q => BY[q.id] = q);
@@ -139,6 +139,35 @@ for (let k = 0; k < 200; k++) {
   if (first.rows.some((x, i) => x.pts !== (x.ok ? E.pointsOf(BY[items[i].id].t) : 0))) bad("문항별 얻은 점수");
   const back = JSON.parse(JSON.stringify(rec));
   if (items.some((it, i) => { const q = BY[it.id]; return E.view(q, it).ansText !== E.view(q, back.items[i]).ansText; })) bad("다시 연 시험지의 정답 표시가 다름");
+}
+// ---------- 시험 '맞음으로 표시'(SPEC_1124 D): 화면 점수 = 시트가 문항 채점으로 다시 계산한 점수 ----------
+{
+  const PTS = { T: 2, M: 2, C: 2, S: 4, N: 4, D: 4 };   // 시트 스크립트 배점(apps-script)
+  const sheetScore = (m, nums) => { let s = 0; for (let i = 0; i < m.length / 2; i++) if (m[2 * i + 1] === "o" || nums.includes(i + 1)) s += PTS[m[2 * i]]; return s; };
+  let tried = 0;
+  for (let k = 0; k < 300; k++) {
+    const items = E.buildExam(DB.questions), a = {};
+    items.forEach((it, i) => { const q = BY[it.id], v = E.view(q, it);
+      a[i] = Math.random() < 0.5 ? (q.t === "진위형" ? q.ans : q.t === "4지선다" ? v.ansPos : q.t === "연결형" ? q.ans.slice() : q.t === "단답형" ? q.accept[0] : v.ansText)
+        : (q.t === "진위형" ? (q.ans === "O" ? "X" : "O") : q.t === "4지선다" ? (v.ansPos + 1) % v.choices.length : q.t === "연결형" ? q.ans.map(() => 0) : "뜻은 같은 답"); });
+    const rec = { items, a }, base = E.examResult(BY, rec), m = E.examMarks(BY, rec);
+    if (m.length !== 80 || sheetScore(m, []) !== base.score) bad("문항 채점으로 시트가 계산한 점수가 화면 점수와 다름", m, base.score);
+    const can = base.rows.map((x, i) => x.selfable ? i : -1).filter(i => i >= 0);
+    if (can.some(i => BY[items[i].id].t !== "단답형") || base.rows.some((x, i) => !x.ok && BY[items[i].id].t === "단답형" && !x.selfable)) bad("시험 대상 문항: 틀린 단답형만");
+    if (!can.length) continue;
+    tried++;
+    const pick = can.filter(() => Math.random() < 0.6), calcI = items.findIndex((it, i) => BY[it.id].t === "계산형" && !base.ok[i]);
+    rec.self = pick.concat(calcI >= 0 ? [calcI] : []);   // 계산형 번호가 섞여 와도 무시
+    const r2 = E.examResult(BY, rec);
+    if (r2.score !== sheetScore(m, pick.map(i => i + 1))) bad("맞음 표시 뒤 화면 점수가 시트 점수와 다름", r2.score);
+    if (r2.score !== base.score + 4 * pick.length) bad("단답형 하나에 4점씩 늘어야 함", base.score, r2.score, pick.length);
+    if (pick.some(i => !r2.rows[i].self || !r2.rows[i].ok || r2.rows[i].pts !== 4)) bad("맞음 표시한 문항 표시·점수");
+    if (calcI >= 0 && (r2.rows[calcI].ok || r2.rows[calcI].self)) bad("계산형은 맞음 처리 안 됨");
+    if (E.examMarks(BY, rec) !== m) bad("맞음 표시가 원래 채점(문항 채점)을 바꾸면 안 됨");
+    rec.self = [];
+    if (E.examResult(BY, rec).score !== base.score) bad("되돌리면 원래 점수");
+  }
+  if (tried < 100) bad("맞음 표시 시험 표본 부족", tried);
 }
 if (E.examResult(BY, { items: [{ id: "없는 문항" }], a: { 0: "x" } }).score !== 0) bad("사라진 문항은 0점");
 if (E.examResult(BY, { items: [{ id: "g1|6", o: [0, 1, 2, 3] }], a: {} }).rows[0].mine !== null) bad("비운 답은 null");

@@ -11,7 +11,12 @@
  * 탭
  *   설정    : B1 회차(기록표 회차 이름과 똑같이, 예: 8회차) / B2 상태(열림·닫힘) / B3 제한 시간(분)
  *   결과    : 제출 한 번에 한 줄. 회차 | 이름 | 점수 | 탭 이탈 | 상태 | 제출 시각 | 브라우저 | 제출 번호
+ *             | 문항 채점 | 원래 점수 | 맞음 처리 문항
  *             제출 번호는 제출 응답으로 학생 기기에 돌려주며, 기기의 '내 시험 결과'와 이 줄을 잇는 열쇠다.
+ *             문항 채점은 문항마다 유형 글자(T 진위·M 연결·C 4지선다·S 단답·N 계산·D 서술) + o/x 이다.
+ *             점수는 학생 기기가 보낸 값이 아니라 이 채점과 시트의 배점(PTS)으로 계산한다.
+ *             학생이 시험 결과 화면에서 '맞음으로 표시'를 누르면(kind:"fix") 점수 칸을 고친 점수로 바꾸고
+ *             원래 점수·맞음 처리 문항 번호를 옆 칸에 남긴다. 모두 되돌리면 옆 칸을 비운다.
  *   기록표용 : '기록표용_만들기'를 실행하면 설정 회차의 첫 응시만 이름 | 점수 로 정리한다(CSV로 내려받아 점수표에 넣음)
  *   신고    : 학습 화면의 '이 문제 이상해요'. 시각 | 문항 id | 보인 내용 | 사유 | 처리
  *            '맞음으로 표시'를 누르면 사유 칸이 '인정 답안 제안: (학생 답)'인 줄이 들어간다(학번·이름 없음).
@@ -19,10 +24,14 @@
 
 const T_SET = '설정', T_RES = '결과', T_REC = '기록표용', T_REP = '신고';
 const HEAD = {
-  [T_RES]: ['회차', '이름', '점수', '탭 이탈', '상태', '제출 시각', '브라우저', '제출 번호'],
+  [T_RES]: ['회차', '이름', '점수', '탭 이탈', '상태', '제출 시각', '브라우저', '제출 번호', '문항 채점', '원래 점수', '맞음 처리 문항'],
   [T_REC]: ['이름', '점수'],
   [T_REP]: ['시각', '문항 id', '보인 내용', '사유', '처리']
 };
+const NCOL = 11;             // 결과 탭 칸 수
+// 문항 유형 글자별 배점(앱의 EXAM_PLAN 배점과 같아야 한다. tools/mock_gas.js가 확인). S·D만 스스로 맞음 처리 대상
+const PTS = { T: 2, M: 2, C: 2, S: 4, N: 4, D: 4 };
+const SELF_OK = 'SD';
 const REPORT_PER_DAY = 50;   // 같은 문항 신고를 하루에 받는 최대 수
 // 교사용 화면(#teacher) 비밀번호. 붙여 넣은 뒤 여기에 적고 '설정하기'를 한 번 실행하면 스크립트 속성에 저장된다.
 // 공개 저장소에는 비워 둔다(저장된 뒤에는 이 줄을 다시 비워도 된다).
@@ -97,6 +106,7 @@ function doPost(e) {
       if (d.kind === 'exam') return out_(exam_(ss, d));
       if (d.kind === 'report') return out_(report_(ss, d));
       if (d.kind === 'suggest') return out_(suggest_(ss, d));
+      if (d.kind === 'fix') return out_(fix_(ss, d));
       if (d.kind === 'admin') return out_(admin_(ss, d));
       return out_({ ok: false, error: 'kind' });
     } finally { lock.releaseLock(); }
@@ -107,13 +117,14 @@ function doPost(e) {
 
 function exam_(ss, d) {
   const name = String(d.name || '').replace(/\s+/g, ' ').trim().slice(0, 20);
-  const score = Number(d.score), leaves = Math.max(0, Math.round(Number(d.leaves) || 0));
+  const marks = d.marks == null ? '' : String(d.marks);
+  if (marks && !marksOk_(marks)) return { ok: false, error: 'bad data' };
+  const score = marks ? marksScore_(marks, []) : Number(d.score), leaves = Math.max(0, Math.round(Number(d.leaves) || 0));
   const round = String(d.round || '').trim();
   const cfg = config_(ss);
   if (!name || !Number.isInteger(score) || score < 0 || score > 100 || !round || round !== cfg.round)
     return { ok: false, error: 'bad data' };
-  const sh = tab_(ss, T_RES);
-  if (!sh.getRange(1, 8).getValue()) sh.getRange(1, 8).setValue(HEAD[T_RES][7]).setFontWeight('bold');   // 예전 판 결과 탭
+  const sh = resTab_(ss);
   const n = sh.getLastRow();
   const rows = n >= 2 ? sh.getRange(2, 1, n - 1, 8).getValues() : [];
   // 앱이 만든 제출 번호를 쓴다. 같은 번호가 이미 있으면 다시 보낸 것이므로 줄을 늘리지 않는다.
@@ -124,8 +135,48 @@ function exam_(ss, d) {
   const st = [again ? '재응시' : '첫 응시'];
   if (!cfg.open) st.push('마감 후');
   const when = d.submitted ? new Date(d.submitted) : new Date();
-  sh.appendRow([safe_(round), safe_(name), score, leaves, st.join(', '), isNaN(when) ? new Date() : when, safe_(String(d.browser || '').slice(0, 60)), sid]);
+  sh.appendRow([safe_(round), safe_(name), score, leaves, st.join(', '), isNaN(when) ? new Date() : when, safe_(String(d.browser || '').slice(0, 60)), sid, marks, '', '']);
   return { ok: true, status: st.join(', '), sid: sid };
+}
+// 결과 탭(예전 판이면 새 칸 제목을 채운다)
+function resTab_(ss) {
+  const sh = tab_(ss, T_RES);
+  const h = sh.getRange(1, 1, 1, NCOL).getValues()[0];
+  HEAD[T_RES].forEach((t, i) => { if (!h[i]) sh.getRange(1, i + 1).setValue(t).setFontWeight('bold'); });
+  return sh;
+}
+function marksOk_(m) { return m.length <= 200 && /^([TMCSND][ox])+$/.test(m); }
+// 문항 채점 + 맞음 처리한 문항 번호(1부터)로 점수를 계산한다
+function marksScore_(m, nums) {
+  let s = 0;
+  for (let i = 0; i < m.length / 2; i++) if (m[2 * i + 1] === 'o' || nums.indexOf(i + 1) >= 0) s += PTS[m[2 * i]];
+  return s;
+}
+
+/* 시험 점수 고치기(SPEC_1124 D): 제출 번호 + 지금 맞음 처리한 문항 번호 집합. 같은 요청이 두 번 와도 같은 결과 */
+function fix_(ss, d) {
+  const sid = String(d.sid || '');
+  if (!/^[a-z0-9]{6,24}$/.test(sid)) return { ok: false, error: 'sid' };
+  const sh = resTab_(ss);
+  const n = sh.getLastRow();
+  const rows = n >= 2 ? sh.getRange(2, 1, n - 1, NCOL).getValues() : [];
+  const k = rows.findIndex(r => String(r[7]) === sid);
+  if (k < 0) return { ok: false, error: 'sid' };
+  const m = String(rows[k][8] || '');
+  if (!marksOk_(m)) return { ok: false, error: 'old' };
+  if (!Array.isArray(d.nums) || d.nums.length > 100) return { ok: false, error: 'num' };
+  const nums = [];
+  for (const x of d.nums) {
+    const i = Number(x);
+    if (!Number.isInteger(i) || i < 1 || i > m.length / 2) return { ok: false, error: 'num' };
+    if (SELF_OK.indexOf(m[2 * i - 2]) < 0 || m[2 * i - 1] !== 'x') return { ok: false, error: 'num' };
+    if (nums.indexOf(i) < 0) nums.push(i);
+  }
+  nums.sort((a, b) => a - b);
+  const orig = marksScore_(m, []), score = marksScore_(m, nums);
+  sh.getRange(k + 2, 3).setValue(score);
+  sh.getRange(k + 2, 10, 1, 2).setValues([nums.length ? [orig, nums.join(', ')] : ['', '']]);
+  return { ok: true, sid: sid, score: score, orig: orig, nums: nums };
 }
 // 제출 번호: 영문 소문자·숫자 12자(시각 + 무작위)
 function newSid_() { return (Date.now().toString(36) + Math.random().toString(36).slice(2, 8) + '000000').slice(0, 12); }
@@ -181,12 +232,13 @@ function admin_(ss, d) {
   const round = String(d.round || '').trim() || cfg.round;
   const sh = tab_(ss, T_RES);
   const n = sh.getLastRow();
-  const all = n >= 2 ? sh.getRange(2, 1, n - 1, 7).getValues() : [];
+  const all = n >= 2 ? sh.getRange(2, 1, n - 1, NCOL).getValues() : [];
   const rounds = [];
   all.forEach(r => { const k = String(r[0]).replace(/^'/, ''); if (k && rounds.indexOf(k) < 0) rounds.push(k); });
   const rows = all.filter(r => String(r[0]).replace(/^'/, '') === round).map(r => ({
     name: String(r[1]).replace(/^'/, ''), score: r[2], leaves: r[3], status: String(r[4]),
-    at: r[5] instanceof Date ? r[5].toISOString() : String(r[5])
+    at: r[5] instanceof Date ? r[5].toISOString() : String(r[5]),
+    orig: r[9], self: String(r[10] || '')
   }));
   return { ok: true, cfg: cfg, round: round, rows: rows, rounds: rounds };
 }
