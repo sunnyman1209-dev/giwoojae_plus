@@ -148,6 +148,11 @@ main{max-width:640px;margin:0 auto;padding:12px 16px calc(120px + env(safe-area-
 .done{text-align:center;padding:30px 10px}
 .stats{display:flex;justify-content:center;gap:24px;margin:16px 0;font-size:15px;color:var(--sub)}
 .stats b{display:block;font-size:26px;color:var(--ink)}
+.self-note{margin:0 0 6px;font-size:13px;color:var(--sub)}
+.self-list{list-style:none;margin:0;padding:0}
+.self-list li{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.self-list li span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.self-list button{flex:none;background:none;border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--ink);cursor:pointer;font-size:13px}
 .foot{margin-top:28px;text-align:center;font-size:12px;color:var(--sub)}
 .foot button{background:none;border:0;color:var(--sub);text-decoration:underline;cursor:pointer;font-size:12px;padding:6px 4px}
 .home h1{font-size:26px;margin:8px 0 4px;letter-spacing:-.02em}
@@ -197,7 +202,7 @@ main{max-width:640px;margin:0 auto;padding:12px 16px calc(120px + env(safe-area-
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbwb5ZbfyTaYW1Xr6ZEFJFIZ9ylF1bnw1sBhi9kkU8sfis_gY4E9EPstPi8-nJ5reiPY/exec";
 const VER = "plus-1";
 /* 기존 앱(gwq1)과 같은 출처를 쓰므로 저장 키를 따로 둔다 (SPEC 3절) */
-const K_LEARN = "gwp_learn1", K_EXAM = "gwp_exam1", K_NAME = "gwp_name", K_REPORT = "gwp_report1";
+const K_LEARN = "gwp_learn1", K_EXAM = "gwp_exam1", K_NAME = "gwp_name", K_REPORT = "gwp_report1", K_SUGGEST = "gwp_suggest1";
 const CIRC = "①②③④⑤⑥", PAIR = "㉠㉡㉢㉣㉤㉥";
 const CHECK = '<svg class="ck" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3L14 5.5"/></svg>';
 const XICON = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
@@ -342,6 +347,17 @@ function itemOk(q,it,a){
   if(q.t==="단답형")return shortOk(a,q.accept);
   if(q.t==="계산형")return calcOk(a,v.value,v.round);
   return false}
+/* 스스로 맞음 처리 (SPEC_1124 D): 직접 써서 답한 단답형·서술형·주관식 모드 4지선다의 오답만. 계산형 제외 */
+function selfMarkable(q,r){
+  if(!q||!r||r.g==="o"||!String(r.mine||"").trim())return false;
+  return q.t==="단답형"||q.t==="서술형"||(q.t==="4지선다"&&!!r.open)}
+/* 학습 기록 st{res,retry,self}에서 맞음 표시(on) 또는 되돌리기. 원래 결과는 self에 남겨 되돌릴 때 쓴다 */
+function selfMark(st,id,on){
+  st.self=st.self||{};st.retry=st.retry||[];
+  if(on){if(!(id in st.self))st.self[id]=st.res[id];st.res[id]="o";st.retry=st.retry.filter(r=>r.id!==id)}
+  else if(id in st.self){st.res[id]=st.self[id];delete st.self[id];
+    if(st.res[id]!=="o"&&!st.retry.some(r=>r.id===id))st.retry.push({id,due:(st.count||0)+10+rint(11)})}
+  return st}
 function scoreExam(byId,items,answers){
   let s=0;const ok=items.map((it,i)=>{const q=byId[it.id];const g=!!q&&itemOk(q,it,answers[i]);if(g)s+=pointsOf(q.t);return g});
   return {score:s,ok}}
@@ -399,7 +415,7 @@ function matchHtml(q){const n=q.right.length;
    ===================================================================== */
 let Q=null,V=null,S=null,lv={},autoNext=0,navLock=false;
 function clearAuto(){if(autoNext){clearTimeout(autoNext);autoNext=0}}
-function lload(){return Object.assign({scope:{k:"all"},seen:[],res:{},retry:[],count:0,cur:null,round:1,open:false},lsGet(K_LEARN)||{})}
+function lload(){return Object.assign({scope:{k:"all"},seen:[],res:{},retry:[],self:{},count:0,cur:null,round:1,open:false},lsGet(K_LEARN)||{})}
 function lsave(){lsSet(K_LEARN,S)}
 function inScope(q,sc=S.scope){if(sc.k==="wrong")return !!S.res[q.id]&&S.res[q.id]!=="o";return true}
 function pool(){return DB.questions.filter(q=>inScope(q))}
@@ -425,7 +441,7 @@ function lshow(){
   Q=BYID[S.cur.id];if(!S.cur.it){S.cur.it=makeInst(Q);lsave()}
   V=view(Q,S.cur.it);lv={answered:false,match:[]};lheader();
   const asOpen=S.open&&Q.t==="4지선다"&&Q.open;
-  let h=`<div class="card"><div class="meta"><span>${esc(asOpen?"주관식":Q.t)}</span>${S.cur.re?'<span class="re">다시 풀기</span>':""}</div>`;
+  let h=`<div class="card"><div class="meta"><span>${esc(asOpen?"주관식":Q.t)}</span>${S.cur.re?'<span class="re">다시 풀기</span>':""}${S.self[Q.id]!=null?'<span class="re">스스로 맞음 처리</span>':""}</div>`;
   h+=`<div class="stem">${md(V.stem)}</div>${figHtml(Q)}<div id="ui"></div><div id="fb"></div></div>`;
   h+=`<div class="foot"><button id="repBtn">이 문제 이상해요</button> · <button id="resetBtn">기록 지우기</button> · <button id="homeBtn">처음 화면</button></div>`;
   $("main").innerHTML=h;$("resetBtn").onclick=resetAll;$("repBtn").onclick=openReport;$("homeBtn").onclick=()=>{location.hash=""};
@@ -433,7 +449,7 @@ function lshow(){
   const ui=$("ui");setAct([]);
   if(asOpen){
     ui.innerHTML=`<div class="inp"><input id="in" autocomplete="off" autocapitalize="off" placeholder="답 입력 (보기 없이)"></div>`;
-    inputAct(v=>{if(lv.answered)return;lv.answered=true;$("in").disabled=true;const ok=shortOk(v,Q.open);finish(ok?"o":"x",{mine:v,canOverride:!ok,showChoices:true})});
+    inputAct(v=>{if(lv.answered)return;lv.answered=true;$("in").disabled=true;const ok=shortOk(v,Q.open);finish(ok?"o":"x",{mine:v,open:true,showChoices:true})});
   }else if(Q.t==="진위형"){
     ui.innerHTML=`<div class="ox"><button class="btn" data-v="O">O</button><button class="btn" data-v="X">X</button></div>`;
     ui.querySelectorAll("button").forEach(b=>b.onclick=()=>gradeChoice(b.dataset.v===Q.ans,b,ui.querySelector(`[data-v="${Q.ans}"]`)));
@@ -449,10 +465,10 @@ function lshow(){
     setAct([{t:"제출",d:true,f:gradeMatch}]);
   }else if(Q.t==="계산형"&&V.value!=null){
     ui.innerHTML=`<div class="inp"><input id="in" inputmode="decimal" autocomplete="off" placeholder="답(숫자)">${Q.unit?`<span class="unit">${esc(Q.unit)}</span>`:""}</div>`;
-    inputAct(v=>{if(lv.answered)return;lv.answered=true;$("in").disabled=true;const ok=calcOk(v,V.value,V.round);finish(ok?"o":"x",{mine:v+(Q.unit?" "+Q.unit:""),canOverride:!ok})});
+    inputAct(v=>{if(lv.answered)return;lv.answered=true;$("in").disabled=true;const ok=calcOk(v,V.value,V.round);finish(ok?"o":"x",{mine:v+(Q.unit?" "+Q.unit:"")})});
   }else if(Q.t==="단답형"&&Q.accept){
     ui.innerHTML=`<div class="inp"><input id="in" autocomplete="off" autocapitalize="off" placeholder="답 입력"></div>`;
-    inputAct(v=>{if(lv.answered)return;lv.answered=true;$("in").disabled=true;const ok=shortOk(v,Q.accept);finish(ok?"o":"x",{mine:v,canOverride:!ok})});
+    inputAct(v=>{if(lv.answered)return;lv.answered=true;$("in").disabled=true;const ok=shortOk(v,Q.accept);finish(ok?"o":"x",{mine:v})});
   }else{
     ui.innerHTML=`<div class="inp"><textarea id="in" placeholder="답을 적어 보십시오 (적지 않아도 됩니다)"></textarea></div>`;
     setAct([{t:"답 확인",f:revealSelf}]);
@@ -490,7 +506,7 @@ function finish(g,opt={}){
   if(lv.done||!S.cur)return;lv.done=true;
   S.count++;const id=Q.id;
   if(!S.cur.re&&!S.seen.includes(id))S.seen.push(id);
-  S.res[id]=g;S.retry=S.retry.filter(r=>r.id!==id);
+  S.res[id]=g;delete S.self[id];S.retry=S.retry.filter(r=>r.id!==id);
   if(g!=="o")S.retry.push({id,due:S.count+10+rint(11)});
   lsave();lheader();
   // 정답이어도 해설을 보여 주고 '다음 문제'로 넘어간다(2026-11-23 요청: 맞혀도 해설 보기)
@@ -504,9 +520,21 @@ function renderFeedback(g,opt){
   const fb=$("fb");
   if(lv.revealed){fb.querySelectorAll(".kw input").forEach(i=>i.disabled=true);fb.insertAdjacentHTML("afterbegin",h)}else fb.innerHTML=h;
   const goNext=()=>{if(lv.moved)return;lv.moved=true;lnext()};
-  const acts=[{t:"다음 문제",f:goNext}];
-  if(opt.canOverride)acts.unshift({t:"내 답도 맞음",g:1,f:()=>{if(lv.moved)return;lv.moved=true;S.res[Q.id]="o";S.retry=S.retry.filter(r=>r.id!==Q.id);lsave();lnext()}});
-  setAct(acts);fb.querySelector(".verdict")?.scrollIntoView({behavior:"smooth",block:"start"})}
+  const mine=opt.mine||lv.mine||"";
+  const acts=()=>{const a=[{t:"다음 문제",f:goNext}];
+    if(selfMarkable(Q,{g,mine,open:opt.open}))a.unshift(S.self[Q.id]!=null?{t:"되돌리기",f:()=>markSelf(false)}:{t:"맞음으로 표시",g:1,f:()=>markSelf(true)});
+    return a};
+  const markSelf=on=>{if(lv.moved)return;selfMark(S,Q.id,on);lsave();lheader();
+    const v=$("fb").querySelector(".verdict");
+    if(v){v.className="verdict "+(on?"ok":g==="m"?"mid":"no");v.textContent=on?"스스로 맞음 처리":g==="m"?"△ 일부 맞음":"오답"}
+    if(on)suggestAnswer(Q,mine);setAct(acts())};
+  setAct(acts());fb.querySelector(".verdict")?.scrollIntoView({behavior:"smooth",block:"start"})}
+/* 맞음으로 표시할 때 문항 번호와 학생 답만 시트 신고 탭에 '인정 답안 제안'으로 보낸다(학번·이름 없음, 같은 답은 한 번만) */
+function suggestAnswer(q,ans){
+  const key=q.id+"|"+norm(ans),sent=lsGet(K_SUGGEST)||[];
+  if(!SHEET_URL||!norm(ans)||sent.includes(key))return;
+  post({kind:"suggest",id:q.id,answer:String(ans).slice(0,100),shown:S.open&&q.t==="4지선다"?"주관식":q.t,ver:VER}).then(ok=>{
+    if(ok){const s2=lsGet(K_SUGGEST)||[];s2.push(key);lsSet(K_SUGGEST,s2.slice(-500))}})}
 function renderDone(){
   lheader();const P=pool(),o=P.filter(q=>S.res[q.id]==="o").length;
   const wrong=DB.questions.filter(q=>S.res[q.id]&&S.res[q.id]!=="o").length;
@@ -527,11 +555,14 @@ function openScope(){
   let h=sheetTop("출제 범위");
   h+=`<h3>범위</h3><div class="grid">${b({k:"all"},"전체")}${b({k:"wrong"},"오답만")}</div>`;
   h+=`<h3>푸는 방식</h3><label class="switch"><input type="checkbox" id="openSw" ${S.open?"checked":""}><span><b>주관식 모드</b><small>답이 용어·코드·숫자 하나인 4지선다는 보기를 감추고 직접 입력합니다</small></span></label>`;
+  const selfIds=Object.keys(S.self).filter(id=>BYID[id]);
+  if(selfIds.length)h+=`<h3>스스로 맞음 처리 (${selfIds.length})</h3><p class="self-note">되돌리면 다시 오답 노트에 들어갑니다.</p><ul class="self-list">${selfIds.map(id=>`<li><span>${esc(String(BYID[id].stem||"").replace(/[*#>\s]+/g," ").trim().slice(0,40))}</span><button type="button" data-un="${esc(id)}">되돌리기</button></li>`).join("")}</ul>`;
   openSheet(h,"출제 범위");
+  $("sheet").querySelectorAll("button[data-un]").forEach(x=>x.onclick=()=>{selfMark(S,x.dataset.un,false);lsave();lheader();openScope()});
   $("sheet").querySelectorAll("button[data-sc]").forEach(x=>x.onclick=()=>setScope(JSON.parse(x.dataset.sc)));
   $("openSw").onchange=e=>{S.open=e.target.checked;lsave();lheader();if(S.cur&&!lv.answered)lshow()}}
 function resetAll(){if(!confirm("푼 기록과 오답을 모두 지울까?"))return;
-  clearAuto();S.seen=[];S.res={};S.retry=[];S.count=0;S.cur=null;S.scope={k:"all"};lsave();lnext()}
+  clearAuto();S.seen=[];S.res={};S.retry=[];S.self={};S.count=0;S.cur=null;S.scope={k:"all"};lsave();lnext()}
 /* 이 문제 이상해요 (학습 버전만, 이름은 보내지 않는다) */
 function shownText(q,it){const v=view(q,it);
   if(v.order)return "보기 순서 "+v.order.map(i=>i+1).join(",")+(S.open&&q.open?" (주관식)":"");

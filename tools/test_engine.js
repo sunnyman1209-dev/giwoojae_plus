@@ -7,7 +7,7 @@ const html = fs.readFileSync(path.join(P, "docs", "index.html"), "utf8");
 const code = html.split("/* ===== ENGINE-START")[1].split("/* ===== ENGINE-END")[0].replace(/^[^\n]*\n/, "");
 const ctx = { CIRC: "①②③④⑤⑥", console, Math };
 vm.createContext(ctx);
-vm.runInContext(code + "\nthis.E={norm,FORMULAS,fillT,pickVals,makeInst,view,calcOk,shortOk,buildExam,scoreExam,examResult,tagKey,EXAM_PLAN,pointsOf};", ctx);
+vm.runInContext(code + "\nthis.E={norm,FORMULAS,fillT,pickVals,makeInst,view,calcOk,shortOk,buildExam,scoreExam,examResult,tagKey,EXAM_PLAN,pointsOf,selfMarkable,selfMark};", ctx);
 const E = ctx.E;
 const DB = JSON.parse(fs.readFileSync(path.join(P, "docs", "data", "questions.json"), "utf8"));
 const BY = {}; DB.questions.forEach(q => BY[q.id] = q);
@@ -68,6 +68,30 @@ if (!E.shortOk("g71", ["G71"])) bad("대소문자 무시");
 if (E.shortOk("", ["G71"])) bad("빈 답이 맞음");
 if (!E.calcOk("0.27", 0.26667, 2)) bad("반올림 답 0.27 인정");
 if (E.calcOk("0.3", 0.26667, 2)) bad("0.3 은 틀려야 함");
+
+// ---------- 스스로 맞음 처리 (학습, SPEC_1124 D) ----------
+const qS = { id: "s1", t: "단답형" }, qD = { id: "s2", t: "서술형" }, qC = { id: "s3", t: "계산형" },
+  qM = { id: "s4", t: "4지선다", open: ["G71"] }, qO = { id: "s5", t: "진위형" };
+if (!E.selfMarkable(qS, { g: "x", mine: "크레이터" })) bad("단답형 오답은 대상");
+if (!E.selfMarkable(qD, { g: "m", mine: "공구 마모" })) bad("서술형 일부 맞음은 대상");
+if (!E.selfMarkable(qM, { g: "x", mine: "g70", open: true })) bad("주관식 모드 4지선다 오답은 대상");
+if (E.selfMarkable(qM, { g: "x", mine: "g70", open: false })) bad("보기로 푼 4지선다는 대상 아님");
+if (E.selfMarkable(qC, { g: "x", mine: "12.5" })) bad("계산형은 대상 아님");
+if (E.selfMarkable(qO, { g: "x", mine: "O" })) bad("진위형은 대상 아님");
+if (E.selfMarkable(qS, { g: "o", mine: "G71" })) bad("이미 맞힌 문항은 대상 아님");
+if (E.selfMarkable(qD, { g: "x", mine: "" })) bad("답을 쓰지 않은 서술형은 대상 아님");
+{
+  const st = { res: { s1: "x", s9: "o" }, retry: [{ id: "s1", due: 30 }], self: {}, count: 20 };
+  E.selfMark(st, "s1", true);
+  if (st.res.s1 !== "o" || !st.self.s1 || st.retry.some(r => r.id === "s1")) bad("맞음 표시 후 맞힘·오답 노트 제외", JSON.stringify(st));
+  E.selfMark(st, "s1", false);
+  if (st.res.s1 !== "x" || st.self.s1 || !st.retry.some(r => r.id === "s1")) bad("되돌린 뒤 원래 오답으로", JSON.stringify(st));
+  const st2 = { res: { s2: "m" }, retry: [] };
+  E.selfMark(st2, "s2", true); E.selfMark(st2, "s2", true); E.selfMark(st2, "s2", false);
+  if (st2.res.s2 !== "m") bad("두 번 눌러도 원래 결과(일부 맞음)로 되돌아감", st2.res.s2);
+  E.selfMark(st2, "s2", false);
+  if (st2.res.s2 !== "m") bad("표시 없는데 되돌리기는 아무 일 없음");
+}
 
 // ---------- CBT 시험지 1,000번 ----------
 const want = Object.fromEntries(E.EXAM_PLAN.map(([t, n]) => [t, n]));
