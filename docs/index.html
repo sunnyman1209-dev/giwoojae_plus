@@ -346,9 +346,9 @@ function buildExam(questions){
     for(const q of pool[t].old){if(got.length>=n)break;if(!blocked(q))add(q)}
     for(const q of pool[t].new){if(got.length>=n)break;if(!got.includes(q)&&!blocked(q))add(q)}
     for(const q of pool[t].old.concat(pool[t].new)){if(got.length>=n)break;if(!got.includes(q)&&!usedId.has(q.id))add(q)} // 마지막 수단: 꼬리표 제한을 풂
-    shuffled(got).forEach(q=>items.push(Object.assign({id:q.id},makeInst(q))))}
+    shuffled(got).forEach(q=>items.push(Object.assign({id:q.id,k:MARK_CODE[q.t]},makeInst(q))))}   // k: 그때 유형 글자(문항이 없어져도 채점 기호를 정함)
   return items}
-function pointsOf(t){const p=EXAM_PLAN.find(x=>x[0]===t);return p?p[2]:0}
+function pointsOf(t){const p=EXAM_PLAN.find(x=>x[0]===t);return p?p[2]:CODE_PTS[MARK_CODE[t]]||0}   // 시험지에 없는 서술형도 시트와 같은 배점
 function itemOk(q,it,a){
   if(a==null||a==="")return false;
   const v=view(q,it);
@@ -382,18 +382,37 @@ function examResult(byId,rec){
   const fixed=typeof mk==="string"&&mk.length===items.length*2?mk:null;
   const rows=items.map((it,i)=>{const q=byId[it.id],x=a[i],mine=x==null||x===""?null:x,code=fixed&&fixed[2*i];
     const graded=fixed?fixed[2*i+1]==="o":!!q&&itemOk(q,it,mine),max=fixed?codePoints(code):q?pointsOf(q.t):0;
-    // 문항이 없어져도 제출 때 채점이 단답·서술 오답이면 맞음 표시·되돌리기를 그대로 둔다(시트와 같은 점수)
-    const selfable=!graded&&typeof mine==="string"&&(fixed?SELF_CODES.includes(code)&&(!q||selfMarkable(q,{g:"x",mine})):selfMarkable(q,{g:"x",mine}));
+    // 제출 때 채점이 있으면 맞음 표시 자격도 그때 유형 글자(단답 S·서술 D)를 따른다. 문항이 없어지거나 유형이 바뀌어도 시트 SELF_OK와 같다
+    const selfable=!graded&&typeof mine==="string"&&(fixed?SELF_CODES.includes(code)&&!!mine.trim():selfMarkable(q,{g:"x",mine}));
     const me=selfable&&self.includes(i),ok=graded||me;
     return {ok,graded,selfable,self:me,pts:ok?max:0,max,mine}});
   return {score:rows.reduce((s,r)=>s+r.pts,0),ok:rows.map(r=>r.ok),rows}}
 /* 시트에 남기는 문항 채점: 문항마다 유형 글자 + 원래 채점 o/x. 시트가 이것과 배점으로 점수를 다시 계산한다 */
 const MARK_CODE={"진위형":"T","연결형":"M","4지선다":"C","단답형":"S","계산형":"N","서술형":"D"};
 const SELF_CODES="SD";   // 시트 스크립트 SELF_OK 와 같다
-function codePoints(c){const t=Object.keys(MARK_CODE).find(k=>MARK_CODE[k]===c);return t?pointsOf(t):0}
+const CODE_PTS={T:2,M:2,C:2,S:4,N:4,D:4};   // 시트 스크립트 PTS 와 같다(서술형 D도 같은 배점)
+function codePoints(c){return CODE_PTS[c]||0}
+/* 문항이 없어졌을 때 시험지 자리로 유형 글자를 정한다. buildExam 은 EXAM_PLAN 순서(진위·연결·4지·단답·계산)로 자리를 채운다 */
+function planCode(i,len){
+  if(len!==EXAM_PLAN.reduce((s,p)=>s+p[1],0))return "C";
+  let k=0;for(const [t,n] of EXAM_PLAN){if(i<k+n)return MARK_CODE[t];k+=n}
+  return "C"}
 function examMarks(byId,rec){
   return examResult(byId,Object.assign({},rec,{self:[],marks:null})).rows.map((r,i)=>{const q=byId[(rec.items[i]||{}).id];
-    return (q&&MARK_CODE[q.t]||"C")+(r.graded?"o":"x")}).join("")}
+    const it=rec.items[i]||{};return (q&&MARK_CODE[q.t]||it.k||planCode(i,rec.items.length))+(r.graded?"o":"x")}).join("")}
+/* 한글 입력기가 글자를 조합하는 중의 Enter(조합 확정)는 제출로 보지 않는다 */
+function imeEnter(e){return !!(e&&(e.isComposing||e.keyCode===229))}
+/* 요청 제한 시간(응답 JSON을 돌려준다): 끊김이 성공·실패로 끝나지 않고 매달리면 진행 표시(SEND_BUSY 등)가 남아 다시 보내기를 못 한다.
+   시간이 지나면 실패로 끝내 기존 다시 보내기 흐름으로 넘긴다. 시트 잠금 대기(30초)보다 길게 둔다(같은 제출 번호는 시트가 한 줄만 남긴다) */
+function tfetch(url,opt,ms,f){
+  f=f||fetch;ms=ms||45000;
+  const ac=typeof AbortController==="function"?new AbortController():null;
+  const o=Object.assign({},opt||{});if(ac)o.signal=ac.signal;
+  let t=0;
+  // 응답 본문(JSON)까지 읽는 데 제한 시간을 둔다. 시간이 지나 끊은 요청의 늦은 실패(AbortError)는 여기서 삼킨다
+  const p=f(url,o).then(r=>r.json());p.catch(()=>{});
+  return Promise.race([p,new Promise((_,rej)=>{t=setTimeout(()=>{if(ac)ac.abort();rej(new Error("timeout"))},ms)})])
+    .then(r=>{clearTimeout(t);return r},e=>{clearTimeout(t);throw e})}
 /* ===== ENGINE-END ===== */
 
 let DB=null,BYID={};
@@ -407,8 +426,8 @@ function toast(){const t=$("toast");t.classList.add("on");setTimeout(()=>t.class
 function post(obj){
   if(!SHEET_URL)return Promise.resolve(null);
   // text/plain으로 보내야 브라우저 사전 확인 없이 구글로 바로 간다(GCODEMCODE와 같은 방식)
-  return fetch(SHEET_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(obj)})
-    .then(r=>r.json()).then(j=>j.ok===true,()=>false)}
+  return tfetch(SHEET_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(obj)})
+    .then(j=>j.ok===true,()=>false)}
 
 /* 해설 블록 (학습과 시험 해설 공개에서 같이 쓴다) */
 function exHtml(q,v,opt={}){
@@ -443,7 +462,8 @@ function matchHtml(q){const n=q.right.length;
 let Q=null,V=null,S=null,lv={},autoNext=0,navLock=false;
 function clearAuto(){if(autoNext){clearTimeout(autoNext);autoNext=0}}
 function lload(){return Object.assign({scope:{k:"all"},seen:[],res:{},retry:[],self:{},count:0,cur:null,round:1,open:false},lsGet(K_LEARN)||{})}
-function lsave(){lsSet(K_LEARN,S)}
+let learnWarned=false;   // 학습 기록을 못 쓰면 한 번 알린다(시험 기록 esave 와 같다)
+function lsave(){if(!lsSet(K_LEARN,S)&&!learnWarned){learnWarned=true;alert("이 기기에 학습 기록을 저장하지 못했습니다. 저장 공간이 부족하거나 사생활 보호 모드일 수 있습니다. 새로고침하면 이번 풀이 기록이 사라질 수 있습니다.")}}
 function inScope(q,sc=S.scope){if(sc.k==="wrong")return !!S.res[q.id]&&S.res[q.id]!=="o";return true}
 function pool(){return DB.questions.filter(q=>inScope(q))}
 const scopeName=(sc=S.scope)=>sc.k==="wrong"?"오답만":"전체";
@@ -501,7 +521,7 @@ function lshow(){
     setAct([{t:"답 확인",f:revealSelf}]);
   }}
 function inputAct(f){const el=$("in");const go=()=>{if(el.value.trim())f(el.value.trim())};
-  el.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();go()}};
+  el.onkeydown=e=>{if(e.key==="Enter"&&!imeEnter(e)){e.preventDefault();go()}};
   setAct([{t:"제출",f:go}])}
 function gradeChoice(ok,btn,right){
   if(lv.answered)return;lv.answered=true;
@@ -663,7 +683,7 @@ function chromeOnly(){
 function fetchConfig(){
   if(demo)return Promise.resolve({ok:true,round:"연습",open:!/closed/.test(location.hash),minutes:30});
   if(!SHEET_URL)return Promise.resolve({ok:false,why:"none"});
-  return fetch(SHEET_URL+"?action=config",{cache:"no-store"}).then(r=>r.json()).catch(()=>({ok:false,why:"net"}))}
+  return tfetch(SHEET_URL+"?action=config",{cache:"no-store"},20000).catch(()=>({ok:false,why:"net"}))}
 function startExam(){
   clearInterval(timer);clearAuto();closeSheet();E=null;
   demo=/^#exam-demo/.test(location.hash);   // 연습 화면: 크롬 확인과 전송을 하지 않는다(교사 리허설·점검용)
@@ -719,7 +739,7 @@ function nameScreen(){
     const rec={round:CFG.round,name,minutes:CFG.minutes,started:now,deadline:now+CFG.minutes*60000,items:buildExam(DB.questions),a:{},at:0,leaves:0,done:null,sent:false};
     EX.recs=EX.recs.filter(r=>r.round!==CFG.round);EX.recs.push(rec);trimRecs();esave();
     resume(rec)};
-  $("nm").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();go()}};
+  $("nm").onkeydown=e=>{if(e.key==="Enter"&&!imeEnter(e)){e.preventDefault();go()}};
   setAct([{t:"처음 화면",g:1,f:()=>{location.hash=""}},{t:"시작",f:go}])}
 function resume(rec){E=rec;ei=Math.min(E.at||0,E.items.length-1);
   if(Date.now()>=E.deadline){submit(true);return}
@@ -749,7 +769,7 @@ function renderQ(){
   $("main").innerHTML=`<div class="card"><div class="meta"><span>${ei+1}번</span><span>${esc(q.t)}</span><span>${pointsOf(q.t)}점</span><button class="flagBtn${fl?" on":""}" id="flagBtn" aria-pressed="${fl}">${fl?"다시 볼 문항":"다시 보기 표시"}</button></div><div class="stem">${md(v.stem)}</div>${figHtml(q)}<div id="ui"></div></div>`;
   window.scrollTo(0,0);const ui=$("ui");
   $("flagBtn").onclick=()=>{if(E.done)return;toggleFlag(ei);const on=isFlag(ei),b=$("flagBtn");b.classList.toggle("on",on);b.setAttribute("aria-pressed",on);b.textContent=on?"다시 볼 문항":"다시 보기 표시"};
-  const save=x=>{if(E.done)return;E.a[ei]=x;E.at=ei;esave()};
+  const save=x=>{if(E.done)return;if(Date.now()>=E.deadline){clearInterval(timer);submit(true);return}E.a[ei]=x;E.at=ei;esave()};   // 마감 뒤 입력은 받지 않고 자동 제출
   if(q.t==="진위형"){
     ui.innerHTML=`<div class="ox">${["O","X"].map(x=>`<button class="btn${a===x?" sel":""}" data-v="${x}">${x}</button>`).join("")}</div>`;
     ui.querySelectorAll("button").forEach(b=>b.onclick=()=>{save(b.dataset.v);ui.querySelectorAll("button").forEach(x=>x.classList.toggle("sel",x===b))});
@@ -766,7 +786,7 @@ function renderQ(){
     // 계산형도 일반 자판: 숫자 전용 자판은 '-' 부호나 단위를 쓸 수 없다(채점은 앞의 숫자만 읽는다)
     ui.innerHTML=`<div class="inp"><input id="in" autocomplete="off" autocapitalize="off" placeholder="${calc?"답(숫자, 단위는 써도 됨)":"답 입력"}" value="${esc(a||"")}">${calc&&q.unit?`<span class="unit">${esc(q.unit)}</span>`:""}</div>`;
     $("in").oninput=e=>save(e.target.value.trim());
-    $("in").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();$("in").blur()}};
+    $("in").onkeydown=e=>{if(e.key==="Enter"&&!imeEnter(e)){e.preventDefault();$("in").blur()}};
   }
   setAct(acts)}
 /* 다시 볼 문항 표시(학생 의견): 시험 중 헷갈린 문항을 표시해 두고 문항 목록에서 찾아간다. 채점과는 관계없다 */
@@ -782,8 +802,9 @@ function openNav(){
 function askSubmit(){
   const blank=E.items.filter((_,i)=>!answered(i)).length,nf=Array.isArray(E.flag)?E.flag.length:0;
   const fl=nf?` 다시 보기 표시한 문항이 ${nf}개 있습니다(${E.flag.map(i=>i+1).join(", ")}번).`:"";
-  if(!confirm((blank?`답을 적지 않은 문항이 ${blank}개 있습니다.`:"")+fl+(blank||nf?" 제출하시겠습니까?":"제출하시겠습니까? 제출하면 고칠 수 없습니다.")))return;
-  submit(false)}
+  const ok=confirm((blank?`답을 적지 않은 문항이 ${blank}개 있습니다.`:"")+fl+(blank||nf?" 제출하시겠습니까?":"제출하시겠습니까? 제출하면 고칠 수 없습니다."));
+  if(!E.done&&Date.now()>=E.deadline){submit(true);return}   // 확인 창을 띄운 사이 시간이 끝났으면 어느 단추를 눌렀든 자동 제출
+  if(ok)submit(false)}
 function submit(auto){
   if(!E||E.done)return;clearInterval(timer);closeSheet();   // 문항 목록을 연 채 시간이 끝나도 목록이 남지 않게
   const r=examResult(BYID,E);
@@ -797,8 +818,8 @@ function submit(auto){
 /* 시험 기록 전송: 시트 응답(제출 번호 포함)을 돌려준다. 실패 false, 서버 없음 null */
 function postExam(obj){
   if(!SHEET_URL)return Promise.resolve(null);
-  return fetch(SHEET_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(obj)})
-    .then(r=>r.json()).then(j=>j&&j.ok===true?j:j&&j.error?{ok:false,error:String(j.error)}:false,()=>false)}
+  return tfetch(SHEET_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(obj)})
+    .then(j=>j&&j.ok===true?j:j&&j.error?{ok:false,error:String(j.error)}:false,()=>false)}
 /* 한 기록은 한 번에 하나만 보낸다. 끊김·서버 혼잡(동시 제출 대기 초과)이면 잠시 뒤 세 번까지 저절로 다시 보낸다 */
 const SEND_BUSY=new Set();
 function sendRec(rec,tries){
@@ -834,8 +855,8 @@ function sendFix(rec){
   FIX_BUSY.add(rec.sid);const nums=(rec.self||[]).map(i=>i+1).sort((x,y)=>x-y),key=nums.join(","),seq=rec.fixSeq||0;
   const same=x=>(x.self||[]).map(i=>i+1).sort((a,b)=>a-b).join(",")===key&&(x.fixSeq||0)===seq;   // 보낸 상태(문항 번호 + 순번)와 같은가
   if(E===rec)fixMsg("고친 점수를 보내는 중…");
-  fetch(SHEET_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({kind:"fix",sid:rec.sid,nums,seq,ver:VER})})
-    .then(r=>r.json()).catch(()=>null).then(j=>{
+  tfetch(SHEET_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({kind:"fix",sid:rec.sid,nums,seq,ver:VER})})
+    .catch(()=>null).then(j=>{
       FIX_BUSY.delete(rec.sid);
       const done=!!(j&&(j.ok||FIX_ERR[j.error])),err=j&&!j.ok?FIX_ERR[j.error]||"":"";
       // 기다리는 사이 결과를 다시 열어 기록을 새로 읽었으면 그 기록(cur)도 같은 상태일 때만 끝난 것으로 한다
@@ -872,7 +893,7 @@ function showReview(rec,at){
     if(!q)return `<div class="rv" id="rv${i}"><div class="h"><b class="${r.ok[i]?"ok":"no"}">${i+1}번 ${r.ok[i]?"맞음":"틀림"}</b><span>${r.rows[i].pts} / ${r.rows[i].max}점</span></div><p class="muted">이 문항은 문제은행에서 바뀌어 다시 볼 수 없습니다.</p>${r.rows[i].mine!=null?`<div class="mine">내 답: ${esc(String(r.rows[i].mine))}</div>`:""}${r.rows[i].selfable?`<button class="selfbtn${r.rows[i].self?" undo":""}" data-self="${i}">${r.rows[i].self?"되돌리기":"맞음으로 표시"}</button>`:""}</div>`;
     const v=view(q,it),a=r.rows[i].mine;
     let mine="(비움)";
-    if(a!=null){if(q.t==="4지선다")mine=`${CIRC[a]} ${v.choices[a]}`;
+    if(a!=null){if(q.t==="4지선다"&&typeof a==="number"&&v.choices)mine=`${CIRC[a]} ${v.choices[a]}`;
       else if(q.t==="연결형"&&Array.isArray(a))mine=a.map((j,k)=>`${CIRC[k]}-${j==null?"?":PAIR[j]}`).join(", ");
       else mine=String(a)}
     const row=r.rows[i],sb=row.selfable?`<button class="selfbtn${row.self?" undo":""}" data-self="${i}">${row.self?"되돌리기":"맞음으로 표시"}</button>`:"";
@@ -905,8 +926,8 @@ function tpwSet(v){try{v?sessionStorage.setItem(K_TPW,v):sessionStorage.removeIt
 function adminCall(action,extra){
   if(!SHEET_URL)return Promise.resolve({ok:false,error:"none"});
   const body=Object.assign({kind:"admin",pw:tpwGet(),action},extra||{});
-  return fetch(SHEET_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)})
-    .then(r=>r.json()).catch(()=>({ok:false,error:"net"}))}
+  return tfetch(SHEET_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)})
+    .catch(()=>({ok:false,error:"net"}))}
 const ADMIN_ERR={pw:"비밀번호가 틀렸습니다.",locked:"비밀번호를 여러 번 틀려 10분 동안 막혔습니다. 잠시 뒤 다시 시도하십시오.",nopw:"시트 스크립트에 비밀번호가 아직 저장되지 않았습니다. 시트 스크립트 편집기에서 '설정하기'를 실행하십시오.",demo:"'연습'은 연습 화면용 이름이라 회차 이름으로 쓸 수 없습니다. 다른 이름을 적으십시오.",
   round:"회차를 적으십시오(예: 8회차).",none:"시험 서버가 연결되지 않았습니다.",net:"서버에 연결하지 못했습니다. 인터넷을 확인하십시오."};
 function teacher(){
@@ -918,7 +939,7 @@ function teacherLogin(msg){
   ecard(`<h2>교사용 화면</h2>${msg?`<p class="muted">${esc(msg)}</p>`:""}
     <div class="field"><label for="tpw">비밀번호</label><input id="tpw" type="password" autocomplete="off"></div>`);
   const go=()=>{const v=$("tpw").value;if(!v.trim())return;tpwSet(v);teacher()};   // 시트는 비밀번호를 그대로 비교하므로 앞뒤 공백을 떼지 않는다
-  $("tpw").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();go()}};$("tpw").focus();
+  $("tpw").onkeydown=e=>{if(e.key==="Enter"&&!imeEnter(e)){e.preventDefault();go()}};$("tpw").focus();
   setAct([{t:"처음 화면",g:1,f:()=>{location.hash=""}},{t:"들어가기",f:go}])}
 function teacherView(r){
   if(!r||!r.ok){if(r&&(r.error==="pw"||r.error==="locked"))tpwSet("");
