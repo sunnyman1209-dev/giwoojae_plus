@@ -80,6 +80,48 @@ ok(r.ok, "인정 답안 제안 받기");
   ok(last && !last.join("|").includes("가나다"), "이름은 남기지 않음"); }
 ok(post({ kind: "suggest", id: "g1|3", answer: "  " }).error === "bad data", "빈 답 제안 거부");
 ok(post({ kind: "suggest", id: "", answer: "x" }).error === "bad data", "문항 번호 없는 제안 거부");
+// 시험 점수 고치기 (SPEC_1124 D): 제출 때 남긴 문항별 채점(유형 글자 + o/x)으로 시트가 배점 기준 다시 계산
+{
+  post({ kind: "admin", pw: "test-pw-0000", action: "open", round: "10회차", minutes: 40 });
+  // 앱의 EXAM_PLAN 대로 40문항을 모두 맞힌 채점표는 시트 계산으로 100점이어야 한다(배점 일치)
+  const html = fs.readFileSync(path.join(__dirname, "..", "docs", "index.html"), "utf8");
+  const plan = JSON.parse(/const EXAM_PLAN=(\[\[.*?\]\]);/.exec(html)[1]);
+  const code = { "진위형": "T", "연결형": "M", "4지선다": "C", "단답형": "S", "계산형": "N" };
+  const all = plan.flatMap(([t, n]) => Array(n).fill(code[t]));
+  const full = all.map(c => c + "o").join("");
+  const f0 = post({ kind: "exam", round: "10회차", name: "만점", score: 100, sid: "full000001", marks: full });
+  ok(f0.ok && subRow("full000001")[0][col("점수")] === 100, "모두 맞힌 채점표는 시트 계산 100점(앱 배점과 같음)");
+  // 31~38 단답형(4점), 39~40 계산형(4점). 31·32·33·39번만 틀림 → 100 - 16 = 84
+  const wrong = new Set([31, 32, 33, 39]);
+  const marks = all.map((c, i) => c + (wrong.has(i + 1) ? "x" : "o")).join("");
+  const e0 = post({ kind: "exam", round: "10회차", name: "고치기", score: 100, sid: "fixtest001", marks });
+  const row = () => subRow("fixtest001")[0];
+  ok(e0.ok && row()[col("점수")] === 84, "학생 기기 점수(100)를 믿지 않고 문항별 채점으로 84점");
+  ok(col("원래 점수") >= 0 && col("맞음 처리 문항") >= 0, "결과 탭에 원래 점수·맞음 처리 문항 칸");
+  let f = post({ kind: "fix", sid: "fixtest001", nums: [31, 33], score: 100 });
+  ok(f.ok && f.score === 92 && row()[col("점수")] === 92 && row()[col("원래 점수")] === 84 && row()[col("맞음 처리 문항")] === "31, 33", "고치기: 92점, 원래 84점, 31, 33");
+  f = post({ kind: "fix", sid: "fixtest001", nums: [33, 31, 31] });
+  ok(f.ok && row()[col("점수")] === 92 && subRow("fixtest001").length === 1, "같은 요청 두 번(순서·중복 달라도) 같은 결과");
+  f = post({ kind: "fix", sid: "fixtest001", nums: [31] });
+  ok(f.ok && row()[col("점수")] === 88 && row()[col("맞음 처리 문항")] === "31", "하나 되돌리기: 88점");
+  ok(post({ kind: "fix", sid: "없는번호", nums: [31] }).error === "sid", "없는 제출 번호 거부");
+  ok(post({ kind: "fix", sid: "fixtest002", nums: [31] }).error === "sid", "결과 탭에 없는 제출 번호 거부");
+  ok(post({ kind: "fix", sid: "fixtest001", nums: [39] }).error === "num" && row()[col("점수")] === 88, "계산형 번호 거부, 점수 그대로");
+  ok(post({ kind: "fix", sid: "fixtest001", nums: [34] }).error === "num", "이미 맞힌 문항 번호 거부");
+  ok(post({ kind: "fix", sid: "fixtest001", nums: [1] }).error === "num", "다른 유형 번호 거부");
+  ok(post({ kind: "fix", sid: "fixtest001", nums: [0] }).error === "num" && post({ kind: "fix", sid: "fixtest001", nums: [41] }).error === "num"
+    && post({ kind: "fix", sid: "fixtest001", nums: "31" }).error === "num" && post({ kind: "fix", sid: "fixtest001", nums: [31.5] }).error === "num", "범위 밖·잘못된 문항 번호 거부");
+  ok(post({ kind: "fix", sid: "k3x9a7qz2m", nums: [31] }).error === "old", "문항별 채점이 없는 예전 제출은 고칠 수 없음");
+  post({ kind: "fix", sid: "fixtest001", nums: [31, 32, 33] });
+  r = post({ kind: "admin", pw: "test-pw-0000", action: "record", round: "10회차" });
+  ok(sheets["기록표용"].d.slice(1).some(x => x[0] === "고치기" && x[1] === 96), "기록표용 탭에 고친 점수(96)");
+  const ar = r.rows.find(x => x.name === "고치기");
+  ok(ar && ar.score === 96 && ar.orig === 84 && ar.self === "31, 32, 33", "교사 화면 결과 목록(CSV 원본)에 고친 점수·원래 점수·고친 문항");
+  f = post({ kind: "fix", sid: "fixtest001", nums: [] });
+  ok(f.ok && row()[col("점수")] === 84 && row()[col("원래 점수")] === "" && row()[col("맞음 처리 문항")] === "", "모두 되돌리면 원래 점수로, 옆 칸 비움");
+  ok(post({ kind: "admin", pw: "test-pw-0000", action: "status", round: "10회차" }).rows.find(x => x.name === "고치기").orig === "", "되돌린 뒤 교사 화면 원래 점수 비움");
+  ok(post({ kind: "exam", round: "10회차", name: "이상", score: 50, sid: "badmarks01", marks: "Zo=x" }).error === "bad data", "잘못된 채점표 거부");
+}
 for (let i = 0; i < 10; i++) post({ kind: "admin", pw: "1", action: "status" });
 ok(post({ kind: "admin", pw: "test-pw-0000", action: "status" }).error === "locked", "10번 틀리면 잠금");
 console.log(fails ? `실패 ${fails}건` : "Apps Script 가짜 시트 시험 모두 통과");
