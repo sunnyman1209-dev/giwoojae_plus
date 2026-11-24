@@ -94,6 +94,16 @@ def run():
 
     # 5. 출처 노출: 기존 문항도 실패로 본다(06에서 덮어쓰기로 고친 뒤 올림)
     expect("기존 문항 해설에 교재", R.leaks({"src": "old", "ex": {"근거": "교재 199쪽 참고"}}), True)
+    # 6. (작업표 15) 계산형 숫자 바꾸기 문항의 근거·보충에 바뀌는 숫자가 남으면 실패
+    cq = {"id": "g1|39v1", "src": "new", "t": "계산형", "stem": "4날 엔드밀, 회전수 1200 rpm, 이송속도 240 mm/min일 때 날당 이송은?",
+          "value": 0.05, "unit": "mm/날",
+          "calc": {"f": "fz", "vars": {"Z": [2, 3, 4], "N": [1000, 1200], "F": [240, 300], "P": [0.5]}},
+          "ex": {"근거": "fz = 240 ÷ (4 × 1200) = 0.05 mm/날이다."}}
+    expect("계산형 근거에 원래 숫자", R.calc_fixed_numbers(cq), True)
+    expect("계산형 근거에 정답 값만", R.calc_fixed_numbers(dict(cq, ex={"근거": "답은 0.05이다."})), True)
+    expect("계산형 근거 일반 설명", R.calc_fixed_numbers(dict(cq, ex={"근거": "fz = F ÷ (Z × N)으로 구한다. 1000으로 나누지 않는다."})), False)
+    expect("계산형 고정값(하나뿐인 변수)", R.calc_fixed_numbers(dict(cq, stem=cq["stem"] + " 피치 0.5", ex={"근거": "피치 0.5 mm를 쓴다."})), False)
+    expect("계산형 아닌 문항은 규칙 밖", R.calc_fixed_numbers(dict(cq, calc=None)), False)
     return fails
 
 

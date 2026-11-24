@@ -135,3 +135,34 @@ def apply_ans_override(by_id, av):
                 continue
         q["ansText"] = txt
     return errs
+
+
+# 계산형 숫자 바꾸기(SPEC 5절, SPEC_1124 이야기 10, 작업표 15): 화면 지문의 숫자는 풀 때마다 바뀌므로
+# 근거·보충·정의 글에 바뀌는 변수의 원래 값(원래 지문에 나온 숫자)이나 원래 정답 값을 적으면 화면 숫자와 어긋난다.
+# 숫자가 든 풀이는 calc.steps(뽑은 숫자를 넣어 보여 줌)에만 둔다. 값이 하나뿐인 변수(고정값)와
+# 단위 환산·'1줄'에 쓰는 1, 1000은 괜찮다.
+NUM = re.compile(r"(?<![\d.])\d+(?:\.\d+)?(?![\d.])")
+
+
+def calc_fixed_numbers(q):
+    """calc 문항의 근거·보충·정의에 남은, 바뀌는 숫자: [숫자, ...]"""
+    c = q.get("calc")
+    if not c:
+        return []
+    varying = set()
+    for key, opts in (c.get("vars") or {}).items():
+        if len(opts) < 2:
+            continue
+        for o in opts:
+            for v in (o if isinstance(o, list) else [o]):
+                varying.add(float(v))
+    stem_nums = {float(x) for x in NUM.findall(str(q.get("stem") or ""))}
+    bad = ((varying & stem_nums) | ({float(q["value"])} if q.get("value") is not None else set())) - {1.0, 1000.0}
+    ex = q.get("ex") or {}
+    out = []
+    for k in ("근거", "보충", "정의"):
+        for s in texts(ex.get(k)):
+            for x in NUM.findall(s):
+                if float(x) in bad and x not in out:
+                    out.append(x)
+    return out

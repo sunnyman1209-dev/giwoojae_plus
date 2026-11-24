@@ -127,6 +127,10 @@ for q in QS:
     rf = R.refs(q)
     if rf:
         ref_warn.append((q["id"], ", ".join(sorted(set(rf)))))
+for q in QS:
+    cf = R.calc_fixed_numbers(q)
+    if cf:
+        err(f"{q['id']} 계산형 근거·보충에 바뀌는 숫자 {', '.join(cf)}(풀이 숫자는 calc.steps에만)")
 print(f"경고: 해설 원본 지칭 {len(ref_warn)}문항")
 if "--notes" in sys.argv:
     out = sys.argv[sys.argv.index("--notes") + 1]

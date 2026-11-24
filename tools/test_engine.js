@@ -5,9 +5,9 @@ const fs = require("fs"), path = require("path"), vm = require("vm");
 const P = path.dirname(__dirname);
 const html = fs.readFileSync(path.join(P, "docs", "index.html"), "utf8");
 const code = html.split("/* ===== ENGINE-START")[1].split("/* ===== ENGINE-END")[0].replace(/^[^\n]*\n/, "");
-const ctx = { CIRC: "①②③④⑤⑥", console, Math };
+const ctx = { CIRC: "①②③④⑤⑥", console, Math, setTimeout, clearTimeout, Promise, AbortController };
 vm.createContext(ctx);
-vm.runInContext(code + "\nthis.E={norm,FORMULAS,fillT,pickVals,makeInst,view,calcOk,shortOk,buildExam,scoreExam,examResult,tagKey,EXAM_PLAN,pointsOf,selfMarkable,selfMark,examMarks};", ctx);
+vm.runInContext(code + "\nthis.E={norm,FORMULAS,fillT,pickVals,makeInst,view,calcOk,shortOk,buildExam,scoreExam,examResult,tagKey,EXAM_PLAN,pointsOf,selfMarkable,selfMark,examMarks,imeEnter,tfetch};", ctx);
 const E = ctx.E;
 const DB = JSON.parse(fs.readFileSync(path.join(P, "docs", "data", "questions.json"), "utf8"));
 const BY = {}; DB.questions.forEach(q => BY[q.id] = q);
@@ -198,10 +198,66 @@ for (let k = 0; k < 200; k++) {
   }
   if (done < 10) bad("marks 시험 표본 부족", done);
 }
+// ---------- (작업표 15) 시험 도중 문항이 없어져도 제출 채점의 유형 글자는 시험지 자리(EXAM_PLAN 순서)를 따른다 ----------
+{
+  const items = E.buildExam(DB.questions), a = {};
+  const want = E.examMarks(BY, { items, a }).replace(/o/g, "x");
+  const gone = {}; items.forEach(it => { gone[it.id] = 1; });
+  const BY0 = Object.fromEntries(Object.entries(BY).filter(([k]) => !gone[k]));
+  if (E.examMarks(BY0, { items, a }) !== want) bad("없어진 문항의 유형 글자가 시험지 자리와 다름", E.examMarks(BY0, { items, a }));
+  const noK = items.map(({ k, ...rest }) => rest);   // 예전 기록(유형 글자 k 없음)
+  if (E.examMarks(BY0, { items: noK, a }) !== want) bad("예전 기록은 시험지 자리로 유형 글자를 정함");
+  if (E.examMarks(BY0, { items: noK.slice(0, 5), a }) !== "Cx".repeat(5)) bad("k 없는 40문항이 아닌 시험지는 C로 둠");
+  const rec = { items, a: { 30: "아무 답" }, self: [30] }; rec.marks = E.examMarks(BY0, rec);
+  const r = E.examResult(BY0, rec);
+  if (!r.rows[30].selfable || r.score !== 4) bad("없어진 단답형 자리도 맞음 표시 대상(시트 SELF_OK와 같음)", r.score);
+  if (E.examResult(BY, { items: [{ id: "x" }], a: { 0: "답" }, marks: "Dx", self: [0] }).score !== 4) bad("서술형 D 배점은 시트와 같은 4점");
+  if (E.pointsOf("서술형") !== 4) bad("marks 없는 기록의 서술형 배점도 4점");
+  const short = items.filter((_, k) => k !== 0);   // 39문항 시험지(자리 추정 불가)에서도 시험지에 적어 둔 유형 글자를 쓴다
+  const ms = E.examMarks(BY0, { items: short, a: {} });
+  if (ms !== short.map(it => it.k + "x").join("")) bad("시험지 항목의 유형 글자(k) 사용", ms.slice(0, 20));
+  if (items.some(it => !it.k)) bad("시험지 항목마다 유형 글자(k)");
+}
+// ---------- (작업표 15) 제출 뒤 문항 유형이 바뀌어도 맞음 표시 자격·점수는 제출 때 채점을 따른다 ----------
+{
+  const items = E.buildExam(DB.questions), a = {};
+  items.forEach((it, i) => { const q = BY[it.id], v = E.view(q, it);
+    a[i] = q.t === "단답형" ? "틀린 답" : q.t === "진위형" ? q.ans : q.t === "4지선다" ? v.ansPos : q.t === "연결형" ? q.ans.slice() : v.ansText; });
+  const rec = { items, a }; rec.marks = E.examMarks(BY, rec);
+  const i = items.findIndex(it => BY[it.id].t === "단답형"); rec.self = [i];
+  const before = E.examResult(BY, rec), q = BY[items[i].id];
+  const BYc = Object.assign({}, BY, { [q.id]: Object.assign({}, q, { t: "4지선다", choices: ["가", "나", "다", "라"], ans: 0 }) });
+  const after = E.examResult(BYc, rec);
+  if (after.score !== before.score || !after.rows[i].selfable || !after.rows[i].self) bad("유형이 바뀐 뒤 다시 연 결과가 제출 때와 다름", before.score, after.score);
+  if (E.examResult(BY, Object.assign({}, rec, { a: Object.assign({}, a, { [i]: "  " }) })).rows[i].selfable) bad("빈칸 답은 맞음 표시 대상 아님");
+}
+// ---------- (작업표 15) 한글 조합 중 Enter, 요청 제한 시간 ----------
+if (!E.imeEnter({ isComposing: true }) || !E.imeEnter({ keyCode: 229 }) || E.imeEnter({ key: "Enter", keyCode: 13 })) bad("한글 조합 중 Enter 판정");
+const tfetchTests = (async () => {
+  let aborted = false;
+  const hang = (u, o) => new Promise(() => { if (o.signal) o.signal.addEventListener("abort", () => { aborted = true; }); });
+  const r1 = await E.tfetch("x", {}, 30, hang).then(() => "ok", e => "fail:" + e.message);
+  if (r1 !== "fail:timeout" || !aborted) bad("매달린 요청은 제한 시간 뒤 실패로 끝나야 함", r1, aborted);
+  const res = v => Promise.resolve({ json: () => Promise.resolve(v) });
+  const r2 = await E.tfetch("x", {}, 1000, () => res({ ok: true })).then(r => r, () => "fail");
+  if (!r2 || r2.ok !== true) bad("제한 시간 안 응답은 JSON으로", r2);
+  const r4 = await E.tfetch("x", {}, 30, () => Promise.resolve({ json: () => new Promise(() => {}) })).then(() => "ok", e => "fail:" + e.message);
+  if (r4 !== "fail:timeout") bad("헤더만 오고 본문이 매달려도 제한 시간 뒤 실패", r4);
+  let unhandled = 0; const onU = () => { unhandled++; }; process.on("unhandledRejection", onU);
+  const abortRej = (u, o) => new Promise((_, rej) => { o.signal.addEventListener("abort", () => rej(Object.assign(new Error("aborted"), { name: "AbortError" }))); });
+  await E.tfetch("x", {}, 20, abortRej).catch(() => {});
+  await new Promise(r => setTimeout(r, 30));
+  process.off("unhandledRejection", onU);
+  if (unhandled) bad("끊은 요청의 늦은 실패가 처리되지 않은 거절로 남음", unhandled);
+  const r3 = await E.tfetch("x", {}, 1000, () => Promise.reject(new Error("net"))).then(() => "ok", e => e.message);
+  if (r3 !== "net") bad("끊김 실패는 그대로 실패", r3);
+})();
 if (!E.calcOk("−10", -10, 0)) bad("유니코드 마이너스(−) 입력 인정");
 if (E.examResult(BY, { items: [{ id: "없는 문항" }], a: { 0: "x" } }).score !== 0) bad("사라진 문항은 0점");
 if (E.examResult(BY, { items: [{ id: "g1|6", o: [0, 1, 2, 3] }], a: {} }).rows[0].mine !== null) bad("비운 답은 null");
 
 console.log("시험지 1,000번: 새 문항 수 분포", JSON.stringify(newCnt), "· 유형별 새 문항 누계", JSON.stringify(typeNew));
-console.log(fail ? `실패 ${fail}건` : "모두 통과");
-process.exit(fail ? 1 : 0);
+tfetchTests.then(() => {
+  console.log(fail ? `실패 ${fail}건` : "모두 통과");
+  process.exit(fail ? 1 : 0);
+});
