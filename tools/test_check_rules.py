@@ -57,6 +57,22 @@ def run():
     expect("해설에 '문항'", R.refs(tb(ex={"근거": "같은 문항이다."})), True)
     expect("오답 줄 앞 번호는 지칭 아님", R.refs(tb(ex={"근거": "NCS 자료집", "오답": ["③ 환경 오차: 온도에서 생긴다."]})), False)
     expect("지문의 문제는 해설 밖", R.refs(tb(stem="다음 문제에서 옳은 것은?")), False)
+    # 4. 기존 문항 해설 덮어쓰기(src/ex_override.json, 작업표 06)
+    old = {"id": "g1|6", "src": "old", "t": "4지선다", "choices": ["a", "b", "c", "d"], "ans": 3,
+           "ex": {"근거": "옛 근거", "오답": ["① a: 문제와 반대이다."], "보충": "지울 글"}}
+    by = {"g1|6": old, "tb|3-12": tb()}
+    e = R.apply_ex_override(by, {"g1|6": {"오답": ["① a: 묻는 것과 반대이다."], "보충": None}})
+    expect("덮어쓰기 정상", e, False)
+    if old["ex"] != {"근거": "옛 근거", "오답": ["① a: 묻는 것과 반대이다."]}:
+        fails.append(f"덮어쓰기 결과가 다름: {old['ex']}")
+    expect("덮어쓰기 없는 문항", R.apply_ex_override(by, {"g9|99": {"근거": "x"}}), True)
+    expect("덮어쓰기는 기존 문항만", R.apply_ex_override(by, {"tb|3-12": {"근거": "x"}}), True)
+    expect("덮어쓰기 모르는 칸", R.apply_ex_override(by, {"g1|6": {"근가": "x"}}), True)
+    expect("덮어쓰기 근거 비움 금지", R.apply_ex_override(by, {"g1|6": {"근거": " "}}), True)
+    expect("덮어쓰기 바뀐 것 없음", R.apply_ex_override(by, {"g1|6": {"근거": "옛 근거"}}), True)
+
+    # 5. 출처 노출: 기존 문항도 실패로 본다(06에서 덮어쓰기로 고친 뒤 올림)
+    expect("기존 문항 해설에 교재", R.leaks({"src": "old", "ex": {"근거": "교재 199쪽 참고"}}), True)
     return fails
 
 

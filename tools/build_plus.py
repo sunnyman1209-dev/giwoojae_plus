@@ -7,9 +7,12 @@ python -I quiz_plus\tools\build_plus.py
 - 새 문항: src\new\*.json (검증 통과분), src\approved.txt 에 적은 id는 work\*\보류.json 에서 가져온다
 - 계산형 숫자 바꾸기: src\calc.json
 - 보기 섞지 않을 문항: src\noshuffle.txt (자동 판정에 더함)
+- 기존 문항 해설 고침: src\ex_override.json (문항 id -> 고친 해설 칸, null이면 칸 지움. 원래 앱은 고치지 않는다)
 출력: docs\data\questions.json
 """
 import glob, json, os, re, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import plus_rules as R  # noqa: E402
 
 sys.stdout.reconfigure(encoding="utf-8")
 P = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -129,6 +132,10 @@ def main():
     calc.pop("_설명", None)
     byid = {q["id"]: q for q in qs}
     errs = []
+    ovp = os.path.join(P, "src", "ex_override.json")
+    ov = json.load(open(ovp, encoding="utf-8")) if os.path.exists(ovp) else {}
+    ov.pop("_설명", None)
+    errs += R.apply_ex_override(byid, ov)
     for cid, c in calc.items():
         if cid not in byid:
             errs.append(f"calc.json: 없는 문항 {cid}")
@@ -167,7 +174,7 @@ def main():
     path = os.path.join(P, "docs", "data", "questions.json")
     json.dump(out, open(path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     n_new = sum(q["src"] == "new" for q in qs)
-    print(f"문항 {len(qs)} (기존 {len(qs) - n_new}, 새 {n_new}), 계산 숫자 바꾸기 {sum('calc' in q for q in qs)}, {stats}")
+    print(f"문항 {len(qs)} (기존 {len(qs) - n_new}, 새 {n_new}), 해설 고침 {len(ov)}, 계산 숫자 바꾸기 {sum('calc' in q for q in qs)}, {stats}")
 
 
 if __name__ == "__main__":
