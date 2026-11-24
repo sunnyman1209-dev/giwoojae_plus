@@ -13,6 +13,7 @@
  *   결과    : 제출 한 번에 한 줄. 회차 | 이름 | 점수 | 탭 이탈 | 상태 | 제출 시각 | 브라우저
  *   기록표용 : '기록표용_만들기'를 실행하면 설정 회차의 첫 응시만 이름 | 점수 로 정리한다(CSV로 내려받아 점수표에 넣음)
  *   신고    : 학습 화면의 '이 문제 이상해요'. 시각 | 문항 id | 보인 내용 | 사유 | 처리
+ *            '맞음으로 표시'를 누르면 사유 칸이 '인정 답안 제안: (학생 답)'인 줄이 들어간다(학번·이름 없음).
  */
 
 const T_SET = '설정', T_RES = '결과', T_REC = '기록표용', T_REP = '신고';
@@ -94,6 +95,7 @@ function doPost(e) {
       const ss = ss_();
       if (d.kind === 'exam') return out_(exam_(ss, d));
       if (d.kind === 'report') return out_(report_(ss, d));
+      if (d.kind === 'suggest') return out_(suggest_(ss, d));
       if (d.kind === 'admin') return out_(admin_(ss, d));
       return out_({ ok: false, error: 'kind' });
     } finally { lock.releaseLock(); }
@@ -123,13 +125,25 @@ function exam_(ss, d) {
 function report_(ss, d) {
   const id = String(d.id || '').slice(0, 60);
   if (!id) return { ok: false, error: 'bad data' };
+  return addReport_(ss, id, String(d.shown || ''), String(d.memo || '').slice(0, 100));
+}
+
+/* 인정 답안 제안(SPEC_1124 D): '맞음으로 표시'를 누르면 문항 번호와 학생 답만 신고 탭에 남긴다 */
+function suggest_(ss, d) {
+  const id = String(d.id || '').slice(0, 60);
+  const answer = String(d.answer || '').replace(/\s+/g, ' ').trim().slice(0, 100);
+  if (!id || !answer) return { ok: false, error: 'bad data' };
+  return addReport_(ss, id, String(d.shown || ''), '인정 답안 제안: ' + answer);
+}
+
+function addReport_(ss, id, shown, memo) {
   const sh = tab_(ss, T_REP);
   const n = sh.getLastRow();
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const rows = n >= 2 ? sh.getRange(2, 1, n - 1, 2).getValues() : [];
   const cnt = rows.filter(r => String(r[1]) === id && new Date(r[0]) >= today).length;
   if (cnt >= REPORT_PER_DAY) return { ok: true, skipped: true };
-  sh.appendRow([new Date(), safe_(id), safe_(String(d.shown || '').slice(0, 200)), safe_(String(d.memo || '').slice(0, 100)), '']);
+  sh.appendRow([new Date(), safe_(id), safe_(shown.slice(0, 200)), safe_(memo), '']);
   return { ok: true };
 }
 

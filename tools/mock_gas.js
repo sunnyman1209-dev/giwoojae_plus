@@ -1,4 +1,4 @@
-// 가짜 시트로 apps-script/기우제플러스.gs 시험(교사용 명령·시험 제출·기록표용). 실행: node tools/mock_gas.js
+// 가짜 시트로 apps-script/기우제플러스.gs 시험(교사용 명령·시험 제출·기록표용·인정 답안 제안). 실행: node tools/mock_gas.js
 const fs = require("fs"), path = require("path"), vm = require("vm");
 const src = fs.readFileSync(path.join(__dirname, "..", "apps-script", "기우제플러스.gs"), "utf8")
   .replace("const TEACHER_PW_INIT = '';", "const TEACHER_PW_INIT = 'test-pw-0000';");
@@ -59,6 +59,14 @@ ok(r.ok && r.cfg.state === "닫힘" && r.rows.length === 2, "닫기·결과 2건
 ok(post({ kind: "exam", round: "8회차", name: "라마바", score: 70, leaves: 0, browser: "크롬" }).status.includes("마감 후"), "닫은 뒤 제출은 마감 후");
 r = post({ kind: "admin", pw: "test-pw-0000", action: "record", round: "8회차" });
 ok(r.ok && sheets["기록표용"].getLastRow() === 3, "기록표용 만들기(첫 응시 2명)");
+// 인정 답안 제안 (SPEC_1124 D): 문항 번호와 학생 답만 신고 탭에, 학번·이름은 남기지 않는다
+r = post({ kind: "suggest", id: "g1|3", answer: "크레이터마모", shown: "주관식", name: "가나다" });
+ok(r.ok, "인정 답안 제안 받기");
+{ const rows = sheets["신고"].d.slice(1), last = rows[rows.length - 1];
+  ok(last && last[1] === "g1|3" && String(last[3]).includes("인정 답안 제안") && String(last[3]).includes("크레이터마모"), "신고 탭에 인정 답안 제안 줄");
+  ok(last && !last.join("|").includes("가나다"), "이름은 남기지 않음"); }
+ok(post({ kind: "suggest", id: "g1|3", answer: "  " }).error === "bad data", "빈 답 제안 거부");
+ok(post({ kind: "suggest", id: "", answer: "x" }).error === "bad data", "문항 번호 없는 제안 거부");
 for (let i = 0; i < 10; i++) post({ kind: "admin", pw: "1", action: "status" });
 ok(post({ kind: "admin", pw: "test-pw-0000", action: "status" }).error === "locked", "10번 틀리면 잠금");
 console.log(fails ? `실패 ${fails}건` : "Apps Script 가짜 시트 시험 모두 통과");
