@@ -60,6 +60,8 @@ def ex_choice(q):
 
 def auto_noshuffle(q):
     ch = q["choices"]
+    if q.get("fig"):
+        return "그림 속 보기 번호"   # 그림에 원본 지문·보기(①~④)가 함께 찍혀 있어 섞으면 번호가 어긋난다(학생 신고 2026-11-27)
     if all(NUM.match(c) for c in ch):
         return "숫자 보기"
     if any(CROSS.search(c) for c in ch):
